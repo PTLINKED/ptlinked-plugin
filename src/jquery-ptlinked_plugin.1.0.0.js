@@ -2432,8 +2432,7 @@
 
 		// Expose methods of Plugin we wish to be public.
 		return {
-			option: option,
-            toggle_info_box: toggle_info_box,
+			option: option,            
 			destroy: destroy
 		};
 	}

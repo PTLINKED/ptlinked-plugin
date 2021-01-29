@@ -34,6 +34,6 @@ $(document).ready( function(){
 			console.log( "Title: " + data["title"] ) ;
 			console.log( "Content: " + data["content"] ) ;
 		}
-	}) ;
+	}) ;	
 
 });
