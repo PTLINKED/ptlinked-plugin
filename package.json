@@ -1,5 +1,5 @@
 {
-  "name": "ptlinked_plugin",
+  "name": "ptlinked-plugin",
   "description": "PTLINKED Exercise Program Library jQuery Plugin.",
   "version": "1.0.0",
   "main": "dist/jquery-ptlinked_plugin.js",  
