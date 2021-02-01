@@ -45,7 +45,7 @@
 	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>		
 	<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
 	<!-- PTLINKED PLUGIN -->
-	<script src="../../src/jquery-ptlinked_plugin.1.0.0.js?d=<?= __LIBRARY_LAST_CHANGE__ ;?>" crossorigin="anonymous"></script>
+	<script src="../../src/jquery-ptlinked_plugin.js?d=<?= __LIBRARY_LAST_CHANGE__ ;?>" crossorigin="anonymous"></script>
 	<!-- TEST JS -->
 	<script src="js/main.js?d=<?= __LIBRARY_LAST_CHANGE__ ;?>" crossorigin="anonymous"></script>
 <!-- ================== END BASE JS ================== -->	
