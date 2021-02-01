@@ -1,119 +1,25 @@
 {
   "name": "ptlinked-plugin",
-  "description": "PTLINKED Exercise Program Library jQuery Plugin.",
   "version": "1.0.0",
-  "main": "dist/jquery-ptlinked_plugin.js",
-  "style": "dist/ptlinked_plugin.css",
-  "files": [
-    "src",
-    "dist"
-  ],
+  "description": "PTLINKED is a digital health / physical therapy company focused on creating engaging digital content and solutions that improve the musculoskeletal health, fitness, and wellness of populations globally, while also equipping providers with innovative tools that enable them to deliver convenient, accessible, and affordable care.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "example": "examples",
+    "test": "test"
+  },
   "scripts": {
-    "build": "npm run build:css && npm run build:js",
-    "build:css": "postcss src/ptlinked_plugin.css -o dist/ptlinked_plugin.css --no-map",
-    "build:js": "rollup -c",
-    "clear": "del-cli dist",
-    "compress": "npm run compress:css && npm run compress:js",
-    "compress:css": "postcss dist/ptlinked_plugin.css -u cssnano -o dist/ptlinked_plugin.min.css --no-map",
-    "compress:js": "uglifyjs dist/jquery-ptlinked_plugin.js -o dist/jquery-ptlinked_plugin.min.js -c -m --comments /^!/",
-    "release": "npm run clear && npm run build && npm run compress && npm test",
-    "start": "npm-run-all --parallel watch:*",
-    "test": "karma start",
-    "watch:js": "rollup -c -m -w"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mfrank4101/ptlinked-plugin.git"
   },
-  "keywords": [
-    "exercise",
-    "library",
-    "ptlinked",
-    "html",
-    "css",
-    "javascript",
-    "front-end",
-    "web"
-  ],
-  "author": "Mike Frank - PTLINKED, LLC. (https://ptlinked.com/)",
-  "license": "MIT",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "bugs": {
     "url": "https://github.com/mfrank4101/ptlinked-plugin/issues"
   },
-  "homepage": "https://ptlinked.com",
-  "devDependencies": {
-    "@babel/core": "^7.12.9",
-    "@babel/preset-env": "^7.12.7",
-    "@commitlint/cli": "^11.0.0",
-    "@commitlint/config-conventional": "^11.0.0",
-    "@rollup/plugin-babel": "^5.2.1",
-    "babel-plugin-istanbul": "^6.0.0",
-    "chai": "^4.2.0",
-    "change-case": "^4.1.1",
-    "codecov": "^3.8.1",
-    "cpy-cli": "^3.1.1",
-    "create-banner": "^1.0.0",
-    "cssnano": "^4.1.10",
-    "del-cli": "^3.0.1",
-    "eslint": "^7.14.0",
-    "eslint-config-airbnb-base": "^14.2.1",
-    "eslint-plugin-import": "^2.22.1",
-    "husky": "^4.3.0",
-    "karma": "^5.2.3",
-    "karma-chai": "^0.1.0",
-    "karma-chrome-launcher": "^3.1.0",
-    "karma-coverage-istanbul-reporter": "^3.0.3",
-    "karma-mocha": "^2.0.1",
-    "karma-mocha-reporter": "^2.2.5",
-    "karma-rollup-preprocessor": "^7.0.5",
-    "lint-staged": "^10.5.2",
-    "mocha": "^8.2.1",
-    "npm-run-all": "^4.1.5",
-    "postcss": "^8.1.10",
-    "postcss-cli": "^8.3.0",
-    "postcss-header": "^3.0.1",
-    "postcss-import": "^13.0.0",
-    "postcss-preset-env": "^6.7.0",
-    "postcss-url": "^10.1.1",
-    "puppeteer": "^5.5.0",
-    "rollup": "^2.33.3",
-    "stylelint": "^13.8.0",
-    "stylelint-config-standard": "^20.0.0",
-    "stylelint-order": "^4.1.0",
-    "uglify-js": "^3.12.0"
-  },
-  "browserslist": [
-    "last 2 versions",
-    "> 1%",
-    "not ie <= 8"
-  ],
-  "commitlint": {
-    "extends": [
-      "@commitlint/config-conventional"
-    ]
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged",
-      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
-    }
-  },
-  "lint-staged": {
-    "{src,test}/**/*.js|*.conf*.js": [
-      "eslint --fix",
-      "git add"
-    ],
-    "{src,docs}/**/*.{css,scss,html}": [
-      "stylelint --fix",
-      "git add"
-    ]
-  },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
-  },
-  "directories": {
-    "doc": "docs",
-    "example": "examples",
-    "test": "test"
-  }
+  "homepage": "https://github.com/mfrank4101/ptlinked-plugin#readme"
 }
