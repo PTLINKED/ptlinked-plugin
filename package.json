@@ -2,23 +2,23 @@
   "name": "ptlinked-plugin",
   "description": "PTLINKED Exercise Program Library jQuery Plugin.",
   "version": "1.0.0",
-  "main": "dist/jquery-ptlinked_plugin.js",  
+  "main": "dist/jquery-ptlinked_plugin.js",
   "style": "dist/ptlinked_plugin.css",
   "files": [
     "src",
-    "dist"    
+    "dist"
   ],
   "scripts": {
     "build": "npm run build:css && npm run build:js",
     "build:css": "postcss src/ptlinked_plugin.css -o dist/ptlinked_plugin.css --no-map",
     "build:js": "rollup -c",
-    "clear": "del-cli dist",    
+    "clear": "del-cli dist",
     "compress": "npm run compress:css && npm run compress:js",
     "compress:css": "postcss dist/ptlinked_plugin.css -u cssnano -o dist/ptlinked_plugin.min.css --no-map",
-    "compress:js": "uglifyjs dist/jquery-ptlinked_plugin.js -o dist/jquery-ptlinked_plugin.min.js -c -m --comments /^!/",        
+    "compress:js": "uglifyjs dist/jquery-ptlinked_plugin.js -o dist/jquery-ptlinked_plugin.min.js -c -m --comments /^!/",
     "release": "npm run clear && npm run build && npm run compress && npm test",
     "start": "npm-run-all --parallel watch:*",
-    "test": "karma start",    
+    "test": "karma start",
     "watch:js": "rollup -c -m -w"
   },
   "repository": {
@@ -28,17 +28,14 @@
   "keywords": [
     "exercise",
     "library",
-    "ptlinked",    
+    "ptlinked",
     "html",
     "css",
     "javascript",
     "front-end",
     "web"
   ],
-  "author": {
-    "name": "Mike Frank - PTLINKED, LLC.",
-    "url": "https://ptlinked.com/"
-  },
+  "author": "Mike Frank - PTLINKED, LLC. (https://ptlinked.com/)",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/mfrank4101/ptlinked-plugin/issues"
@@ -112,6 +109,11 @@
     ]
   },
   "publishConfig": {
-    "registry":"https://npm.pkg.github.com"
+    "registry": "https://npm.pkg.github.com"
+  },
+  "directories": {
+    "doc": "docs",
+    "example": "examples",
+    "test": "test"
   }
 }
