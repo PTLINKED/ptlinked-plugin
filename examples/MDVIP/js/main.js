@@ -12,7 +12,7 @@ $(document).ready( function(){
 		training_mode: false,
 		debug_mode: true,
 		user_type: 'physician',
-		user_uid: 3,		
+		user_uid: 'mdvip-phy001',		
 		style_sheet: '',
         header_element_class: 'site-header',
         viewer_header_element_class: 'viewer--header',

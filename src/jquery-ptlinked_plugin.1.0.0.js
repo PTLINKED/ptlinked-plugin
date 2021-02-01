@@ -88,6 +88,7 @@
         var current_index = 0 ;                // Current page index
         var record_chunks = 25 ;               // Number of records to return
         var __exercise_program_id = 0 ;        // Currently selected exercise program id to display in viewer
+        var __exercise_program_code = 0 ;      // Currently selected exercise program code to display in viewer
 
         var __error_detected = false ;
 		
@@ -1542,6 +1543,41 @@
             });
         }
 
+        // 4.2 Load Exercise Program
+        function loadExerciseProgramCode( ) {
+            var url = options["api_root_url"] + "/exerciseprogram/resolve_code/"+__exercise_program_code ;   
+
+            $.ajax({
+                type: "GET",
+                crossDomain: true,
+                headers: { 'token-authorization-x': options["api_key"], 'ptlinked-uid-x': options["user_uid"], 'ptlinked-utype-x': options["user_type"] }, 
+                url: url,                
+                dataType: "json",
+                error: function( jqXHR, textStatus, errorThrown ) {
+                    if( options["debug_mode"] ) {
+                        console.log( "::::: Load Exercise Program AJAX :::::" ) ;
+                        console.log( "Request Error or Timeout" ) ;               
+                        console.log( "Status Code: " + jqXHR["status"] ) ;
+                        console.log( "Status Msg: " + jqXHR["statusText"] ) ;             
+                        console.log( "Response Msg: " + jqXHR["responseText"] ) ;
+                        console.log( "::::: ===== ===== ===== ===== :::::" ) ;
+                    }
+                    __error_detected = true ;
+                    toggle_info_box( "predesigned--sys_error", "PROG" + jqXHR["status"] + " - " + jqXHR["statusText"] ) ;
+                },
+                success: function( data, textStatus, jqXHR ) {                      
+                    var status = jqXHR["status"] ;
+                    if( status == 200 ) {
+                        var id = data ;
+                        if( id > 0 ) {
+                            __exercise_program_id = id ;
+                            loadExerciseProgram( ) ;
+                        }                        
+                    }
+                }        
+            });
+        }
+
         // 4.3 Render the exercise Program
         function renderExerciseProgram( d ) {            
             $("h1.viewer--header__title").html( d["meta"]["title"] ) ;
@@ -2077,7 +2113,14 @@
         }
 
 
-		
+		function start( ) {
+            if( options["debug_mode"] ) { console.log( "----- Rendering User Interface") ; }
+            render( ) ; // Render Interface
+            
+            if( options["debug_mode"] ) { console.log( "----- Register User Session") ; }
+            registerUser( ) ;  
+        }
+
 		// Initialize plugin.		
 		function init() {
 			if( options["debug_mode"] ) { console.log( "::::: Plugin Initialization :::::") ; }
@@ -2091,13 +2134,7 @@
             __page_request_values["f4"] = 0 ;   // Condition Filter
             __page_request_values["f5"] = 0 ;   // Equipment Filter 
             current_index = 0 ; // Current Index Count
-            record_chunks = 25 ; // Total Records to load          
-
-            if( options["debug_mode"] ) { console.log( "----- Register User Session") ; }
-            registerUser( ) ;  
-            
-            if( options["debug_mode"] ) { console.log( "----- Rendering User Interface") ; }
-            render( ) ; // Render Interface
+            record_chunks = 25 ; // Total Records to load                                  
 
             if( options["debug_mode"] ) { console.log( "----- Calculate Plugin Container Height") ; }
             calc_plugin_container_height( ) ; // Calculate Container Height for library
@@ -2270,7 +2307,7 @@
                 success: function( data, textStatus, jqXHR ) {                      
                     var status = jqXHR["status"] ;                    
                     if( status == 200 ) {
-                        
+                        init( ) ;
                     } else if( status == 201 ) {                
                         
                     }
@@ -2282,10 +2319,10 @@
         function process_url_query( ) {            
             if( Object.keys(__page_request_query_values).length > 0 ) {                
                 if( typeof __page_request_query_values["e"] != 'undefined' ) {
-                    var epid = __page_request_query_values["e"] ;                    
-                    if( epid > 0 ) {
-                        __exercise_program_id = epid ;
-                        loadExerciseProgram( ) ;
+                    var code = __page_request_query_values["e"] ;                    
+                    if( code != '' ) {
+                        __exercise_program_code = code ;
+                        loadExerciseProgramCode( ) ;
                     }
                 }
             }
@@ -2428,7 +2465,7 @@
 		}
 
 		// Initialize the plugin instance.
-		init();
+		start();
 
 		// Expose methods of Plugin we wish to be public.
 		return {
@@ -2500,8 +2537,8 @@
 		onInit: function() {},                                      // On plugin initialization callback
 		onDestroy: function() {},                                   // On plugin destroy callback
         onSendProgram: function(data) {},                               // On Send Exercise Program callback
-        onSaveProgram: function() {},                               // On Save Exercise Program callback
-        onPrintProgram: function() {},                              // On Print Exercise Program callback
+        onSaveProgram: function(data) {},                               // On Save Exercise Program callback
+        onPrintProgram: function(data) {},                              // On Print Exercise Program callback
         onShowDialog: function(data) {}                                 // Triggered when a dialog box needs to be displayed
 	};
 	
