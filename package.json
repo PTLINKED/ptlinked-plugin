@@ -1,5 +1,5 @@
 {
-  "name": "@mfrank4101@ptlinked-plugin",
+  "name": "@mfrank4101/ptlinked-plugin",
   "version": "1.0.0",
   "description": "PTLINKED is a digital health / physical therapy company focused on creating engaging digital content and solutions that improve the musculoskeletal health, fitness, and wellness of populations globally, while also equipping providers with innovative tools that enable them to deliver convenient, accessible, and affordable care.",
   "main": "dist/jquery-ptlinked_plugin.js",
