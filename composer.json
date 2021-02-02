@@ -1,4 +1,5 @@
 {
+        "name": "PTLINKED/ptlinked-plugin",
         "type": "package",
         "package": {
             "name": "PTLINKED/ptlinked-plugin",
