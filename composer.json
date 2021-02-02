@@ -2,8 +2,7 @@
         "name": "PTLINKED/ptlinked-plugin",
         "type": "package",
         "package": {
-            "name": "PTLINKED/ptlinked-plugin",
-            "version": "v1.0.0",
+            "name": "PTLINKED/ptlinked-plugin",            
             "type": "drupal-library",
             "dist": {
                 "url": "https://github.com/PTLINKED/ptlinked-plugin/archive/v1.0.0-stable.zip",
