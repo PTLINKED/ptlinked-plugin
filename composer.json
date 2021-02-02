@@ -1,0 +1,12 @@
+{
+        "type": "package",
+        "package": {
+            "name": "PTLINKED/ptlinked-plugin",
+            "version": "v1.0.0",
+            "type": "drupal-library",
+            "dist": {
+                "url": "https://github.com/facebook/react/archive/v1.0.0-alpha.zip",
+                "type": "zip"
+            }
+        }
+    }
