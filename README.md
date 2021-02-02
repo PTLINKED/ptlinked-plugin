@@ -32,7 +32,7 @@ dist/
 ### Installation
 
 ```shell
-php composer require ptlinked/ptlinked-pluigin
+php composer require ptlinked/ptlinked-plugin
 ```
 
 Includes:
