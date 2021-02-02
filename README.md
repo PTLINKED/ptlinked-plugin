@@ -32,7 +32,7 @@ dist/
 ### Installation
 
 ```shell
-php composer jquery-ptlinked_plugin
+php composer require ptlinked/ptlinked-pluigin
 ```
 
 Includes:

@@ -5,7 +5,7 @@
             "name": "ptlinked/ptlinked-plugin",            
             "type": "library",
             "dist": {
-                "url": "https://github.com/PTLINKED/ptlinked-plugin/archive/v1.0.0.zip",
+                "url": "https://github.com/PTLINKED/ptlinked-plugin/archive/v1.0.0.tar.gz",
                 "type": "zip"
             }
         }
