@@ -2348,7 +2348,9 @@
             } else {
                 h_page_header = Math.round( $("." + options["header_element_class"].trim( ) ).outerHeight( ) ) ;
             }
-            console.log( "Page Header Height: " + h_page_header ) ;
+            if( options["debug_mode"] ) {
+                console.log( "Page Header Height: " + h_page_header ) ;
+            }
             var h_full_page = Math.round( $("body").outerHeight( ) ) ;
             var h_plugin_container = Math.round( h_full_page - h_page_header ) ;
             $el.css( "height", h_plugin_container ) ;
