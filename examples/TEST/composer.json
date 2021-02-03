@@ -1,0 +1,11 @@
+{
+	"repositories": [
+		{
+			"type": "vcs",
+			"url": "https://github.com/ptlinked/ptlinked-plugin"
+		}
+	],
+	"require": {
+		"ptlinked/ptlinked-plugin": "^1.0"
+	}
+}
