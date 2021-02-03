@@ -12,22 +12,22 @@
 <!--<![endif]-->
 <head>
 	<title>MDVIP Test</title>
-	<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />	
-    <meta name="robots" content="noindex">    
+	<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
+    <meta name="robots" content="noindex">
 	<!-- ================== BEGIN BASE CSS STYLE ================== -->
-	<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">	
-	<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">		
+	<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
 	<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
 	<link href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet" >
 	<!--<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">-->
-	<link rel="stylesheet" href="css/mdvip-styles.css?d=<?= __LIBRARY_LAST_CHANGE__ ;?>" crossorigin="anonymous">	
+	<link rel="stylesheet" href="css/mdvip-styles.css?d=<?= __LIBRARY_LAST_CHANGE__ ;?>" crossorigin="anonymous">
 	<link rel="stylesheet" href="../../src/ptlinked_plugin.css?d=<?= __LIBRARY_LAST_CHANGE__ ;?>" crossorigin="anonymous">
-	<!-- ================== END BASE CSS STYLE ================== -->	
+	<!-- ================== END BASE CSS STYLE ================== -->
 </head>
 <body>
 
 	<!-- PAGE CONTAINER -->
-	<div id="page-container" class="page-header-fixed">
+	<div id="page-container" class="page-header-fixed">		
 
 		<!-- MDVIP TEST HEADER BLOCK -->
 		<?php include( "html_includes/header.inc.php" ) ; ?>
@@ -35,14 +35,14 @@
 
 		<!-- PTLINKED APPLICATION CONTAINER -->
 		<div id="ptlinked--application_container" class="ptlinked--application_container"></div>
-		<!-- END PTLINKED APPLICATION CONTAINER -->		
+		<!-- END PTLINKED APPLICATION CONTAINER -->
 
 	</div>
 	<!-- END PAGE CONTAINER -->
 
 <!-- ================== BEGIN BASE JS ================== -->
 	<script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
-	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>		
+	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
 	<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
 	<!-- PTLINKED PLUGIN -->
 	<script src="../../src/jquery-ptlinked_plugin.js?d=<?= __LIBRARY_LAST_CHANGE__ ;?>" crossorigin="anonymous"></script>

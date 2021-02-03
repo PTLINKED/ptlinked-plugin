@@ -2334,12 +2334,21 @@
             // Make sure page header EL passed/set actually exists
             // If page header EL option doesn't exist, and either does the default EL, then use a fixed header size as fallback
             // Return the height in PX that the plugin container needs to be (.scroll-on-hover, .ptlinked--application_container)
-            var el_page_header = $("."+options["header_element_class"]) ;
-            if( !el_page_header.length ) {
-                // Header element doesn't exist - do something
+            var h_page_header = 0.0 ;
+            var hdr_classes = options["header_element_class"].split( "," ) ;
+            if( hdr_classes.length > 1 ) {
+                var tmpH =  0.0 ;
+                for( var i = 0 ; i < hdr_classes.length ; i++ ) {
+                    var tmp_hdr = $("." + hdr_classes[i].trim() ) ;
+                    if( tmp_hdr.length ) {
+                        tmpH += Math.round( tmp_hdr.outerHeight( ) ) ;
+                    }
+                }
+                h_page_header = tmpH ;
+            } else {
+                h_page_header = Math.round( $("." + options["header_element_class"].trim( ) ).outerHeight( ) ) ;
             }
-
-            var h_page_header = Math.round( $(el_page_header).outerHeight( ) ) ;
+            console.log( "Page Header Height: " + h_page_header ) ;
             var h_full_page = Math.round( $("body").outerHeight( ) ) ;
             var h_plugin_container = Math.round( h_full_page - h_page_header ) ;
             $el.css( "height", h_plugin_container ) ;

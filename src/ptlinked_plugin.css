@@ -40,6 +40,7 @@
 @media (max-width:414px) { .site-header__title{ font-size: 2.8rem; } }
 .site-header__main-nav{ margin-bottom: 34px; }
 .ui-dialog{ z-index: 5000!important; }
+.temp-site-header-test{ display: block; height: 155px; width: 100%; background-color: #fff; }
 
 /* 1.1 Reset and overrides */
 
