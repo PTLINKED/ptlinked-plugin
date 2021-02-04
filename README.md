@@ -52,15 +52,15 @@ Includes:
 
 ```html
 <script src="/path/to/jquery.js"></script><!-- jQuery is required -->
-<script src="/path/to/vendor/ptlinked/ptlinked-plugin/dist/jquery-ptlinked.min.js"></script><!-- jQuery PTLINKED Plugin is required -->
+<script src="/path/to/vendor/ptlinked/ptlinked-plugin/dist/jquery-ptlinked_plugin.min.js"></script><!-- jQuery PTLINKED Plugin is required -->
 <link  href="/path/to/vendor/ptlinked/ptlinked-plugin/dist/ptlinked_plugin.min.css" rel="stylesheet"><!-- Plugin default stylesheet is required -->
 ```
 
 The latest stable release of the plugin is also hosted on the PTLINKED CDN.
 
 ```html
-<script src="/path/to/CDN/jquery-ptlinked.min.js"></script>
-<link  href="/path/to/CDN/ptlinked_plugin.min.css" rel="stylesheet">
+<script src="https://0e7822f9ecb8551cd298-03053818a8848e389259d1c57ba1747f.ssl.cf2.rackcdn.com/jquery-ptlinked_plugin.min.js"></script>
+<link  href="https://0e7822f9ecb8551cd298-03053818a8848e389259d1c57ba1747f.ssl.cf2.rackcdn.com/ptlinked_plugin.min.css" rel="stylesheet">
 ```
 
 ### Usage
