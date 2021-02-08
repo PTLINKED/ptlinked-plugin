@@ -370,6 +370,7 @@ ptlinked_app = $("#ptlinked--application_container").ptlinkedLibrary({
 - Opera (latest)
 - Edge (latest)
 - Internet Explorer 11+
+- iOS & Android
 
 [⬆ back to top](#table-of-contents)
 
