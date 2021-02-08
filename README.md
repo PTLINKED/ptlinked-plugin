@@ -22,7 +22,7 @@ The PTLINKED plugin is a jQuery plugin that will integrate seamlessly into any w
 ```text
 dist/
 ├── ptlinked_plugin.css
-├── ptlinked_plugin.min.css               (compressed)
+├── ptlinked_plugin.min.css         (compressed)
 ├── jquery-ptlinked_plugin.js        
 └── jquery-ptlinked_plugin.min.js   (compressed)
 ```
@@ -140,8 +140,10 @@ You must specify the base URL of the page the PTLINKED Plugin will be initialize
 
 ### user_uid (required)
 
-- Type: `integer`
+- Type: `string`
 - Default: 0
+
+This option allows you to specify a unique user identifier for the currently logged in user. This option supports both an integer value or a string, as long as its unique to each specific user.
 
 
 ### user_type (required)
@@ -151,19 +153,26 @@ You must specify the base URL of the page the PTLINKED Plugin will be initialize
 
 This option will allow you to specify the type of user who is using the plugin. The purpose of this is to allow functionality control over certain aspects of the plugin based on the type of user using it. For example, a user type **Physician** will need the ability to **Send** exercise programs to their patients. Whereas a user type **patient** will not need that functionality.
 
+### video_bg
+
+- Type: `string`
+- Default: `white`
+
+This option will tell the plugin which background color version of the exercise videos to use. The default is **white** with the ability to set as either **blue** or **grey**.
+
 ### header_element_class (required)
 
 - Type: `string`
 - Default: `'site-header'`
 
-This option allows you to define the web page header wrapper class name. The header, in this situation, refers to the visual HTML header at the top of the webpage (i.e. logo and primary menu header bar). This option is **essential** because the plugin uses the header wrapper element to calculate the plugin content display wrapper height. Without specifying this, there will be issues with the vertical scrollbar within the library content area.
+This option allows you to define the web page header wrapper class name. The header, in this situation, refers to the visual HTML header at the top of the webpage (i.e. logo and primary menu header bar). This option is **essential** because the plugin uses the header wrapper element to calculate the plugin content display wrapper height. Without specifying this, there will be issues with the vertical scrollbar within the library content area. If the webpage header has multiple header elements that are not wrapped under one DOM element, you can specify multiple class names by seperating them with a coma (i.e. 'primary-site-header,secondary-site-header').
 
 ### viewer_header_element_class
 
 - Type: `string`
 - Default: `'viewer--header'`
 
-This option is for the exercise program viewer overlay. There should not be a need to change this unless you're using a custom HTML/CSS for the viewer overlay.
+This option is for the exercise program viewer overlay. You should not need to change this value unless you're using a custom HTML/CSS for the viewer overlay.
 
 ### viewer_thumb_scroller_class
 
@@ -178,7 +187,7 @@ As with the previous option, this should not be changed. It is used to calculate
 - Default: `'jquery'`
 - Options:
 	- `'jquery'`: Use jQuery UI dialog boxes. When using this option, the plugin iteself will trigger the jQuery dialog box.
-	- `'hook'`: Setting this option will not trigger any dialog box from within the plugin. Instead, it will trigger a callback function `onShowDialog` with a data object containing the title, content, and button configuration. This will allow you to hook the dialog box calls and display anytype of dialog box framework/component your site or application is using.
+	- `'hook'`: Setting this value will not trigger any dialog box from within the plugin. Instead, it will trigger a callback function `onShowDialog` with a data object containing the title, content, and button configuration. This will allow you to hook the dialog box calls and display anytype of dialog box framework/component your site or application is using.
 
 ### save_favorites
 
@@ -258,7 +267,7 @@ ptlinked_app = $("#ptlinked--application_container").ptlinkedLibrary({
 
 ### onSendProgram( data )
 
-This callback is triggered when a user clicks the **Send Program** button on the exercise viewer. A data object is passed to the registered callback function providing details on the exercise program being sent.
+This callback is triggered when a user clicks the **Send** button on the exercise viewer. A data object is passed to the registered callback function providing details on the exercise program being sent.
 
 ```js
 ptlinked_app = $("#ptlinked--application_container").ptlinkedLibrary({
@@ -276,7 +285,7 @@ ptlinked_app = $("#ptlinked--application_container").ptlinkedLibrary({
 
 ### onPrintProgram( data )
 
-This callback is triggered when a user clicks the **Print Program** button on the exercise viewer. A data object is passed to the registered callback function providing details on the exercise program being printed.
+This callback is triggered when a user clicks the **Print** button on the exercise viewer. A data object is passed to the registered callback function providing details on the exercise program being printed.
 
 ```js
 ptlinked_app = $("#ptlinked--application_container").ptlinkedLibrary({
@@ -286,6 +295,44 @@ ptlinked_app = $("#ptlinked--application_container").ptlinkedLibrary({
 		console.log( "User wants to print this exercise program." ) ;
 		console.log( "Title of the Exercise Program: " + data["exercise_program_title"] ) ;		
 		console.log( "Direct Link to Exercise Program: " + data["exercise_program_link"] ) ;		
+		console.log( "User UID: " + data["user_id"] ) ;
+
+	}
+
+});
+```
+
+### onSaveProgram( data )
+
+This callback is triggered when a user clicks the **Save** button on the exercise viewer. A data object is passed to the registered callback function providing details on the exercise program being saved.
+
+```js
+ptlinked_app = $("#ptlinked--application_container").ptlinkedLibrary({
+
+	onSaveProgram: function( data ){
+
+		console.log( "User wants to save this exercise program." ) ;
+		console.log( "Title of the Exercise Program: " + data["exercise_program_title"] ) ;		
+		console.log( "Direct Link to Exercise Program: " + data["exercise_program_link"] ) ;		
+		console.log( "User UID: " + data["user_id"] ) ;
+
+	}
+
+});
+```
+
+### onViewExerciseProgram( data )
+
+This callback is triggered when a user clicks an exercise program card to view the program. A data object is passed to the registered callback function providing details on the exercise program being viewed.
+
+```js
+ptlinked_app = $("#ptlinked--application_container").ptlinkedLibrary({
+
+	onViewExerciseProgram: function( data ){
+
+		console.log( "User wants to view this exercise program." ) ;
+		console.log( "Title of the Exercise Program: " + data["title"] ) ;		
+		console.log( "Direct Link to Exercise Program: " + data["url"] ) ;		
 		console.log( "User UID: " + data["user_id"] ) ;
 
 	}

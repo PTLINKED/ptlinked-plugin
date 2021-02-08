@@ -21,7 +21,8 @@
 	<link href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet" >
 	<!--<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">-->
 	<link rel="stylesheet" href="css/mdvip-styles.css?d=<?= __LIBRARY_LAST_CHANGE__ ;?>" crossorigin="anonymous">
-	<link rel="stylesheet" href="../TEST/vendor/ptlinked/ptlinked-plugin/dist/ptlinked_plugin.min.css?d=<?= __LIBRARY_LAST_CHANGE__ ;?>" crossorigin="anonymous">
+	<!--<link rel="stylesheet" href="../TEST/vendor/ptlinked/ptlinked-plugin/dist/ptlinked_plugin.min.css?d=<?= __LIBRARY_LAST_CHANGE__ ;?>" crossorigin="anonymous">-->
+	<link rel="stylesheet" href="../../src/ptlinked_plugin.css?d=<?= __LIBRARY_LAST_CHANGE__ ;?>" crossorigin="anonymous">
 	<!-- ================== END BASE CSS STYLE ================== -->
 </head>
 <body>
@@ -45,7 +46,8 @@
 	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
 	<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
 	<!-- PTLINKED PLUGIN -->
-	<script src="../TEST/vendor/ptlinked/ptlinked-plugin/dist/jquery-ptlinked_plugin.min.js?d=<?= __LIBRARY_LAST_CHANGE__ ;?>" crossorigin="anonymous"></script>
+	<!--<script src="../TEST/vendor/ptlinked/ptlinked-plugin/dist/jquery-ptlinked_plugin.min.js?d=<?= __LIBRARY_LAST_CHANGE__ ;?>" crossorigin="anonymous"></script>-->
+	<script src="../../src/jquery-ptlinked_plugin.js?d=<?= __LIBRARY_LAST_CHANGE__ ;?>" crossorigin="anonymous"></script>
 	<!-- TEST JS -->
 	<script src="js/main.js?d=<?= __LIBRARY_LAST_CHANGE__ ;?>" crossorigin="anonymous"></script>
 <!-- ================== END BASE JS ================== -->	

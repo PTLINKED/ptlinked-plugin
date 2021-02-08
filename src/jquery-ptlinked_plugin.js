@@ -88,7 +88,7 @@
         var current_index = 0 ;                // Current page index
         var record_chunks = 25 ;               // Number of records to return
         var __exercise_program_id = 0 ;        // Currently selected exercise program id to display in viewer
-        var __exercise_program_code = 0 ;      // Currently selected exercise program code to display in viewer
+        var __exercise_program_code = '' ;      // Currently selected exercise program code to display in viewer
 
         var __error_detected = false ;
 		
@@ -130,10 +130,8 @@
                         $.each( data, function( index, value ) {                    
                             mbodyregion.append( value ) ;
                         });                        
-                        mbodyregion.select2( ) ;
-                        $("#predesigned_filters--sortby-mobile").select2( ) ;
-
-                        mbodyregion.on('select2:select', function(e){
+                        mbodyregion.select2( ) ;                        
+                        mbodyregion.unbind( "select2:select").on('select2:select', function(e){
                             var oid = $("#predesigned_filters--bodyregion-mobile").val( ) ;       
                             var custom_cat = $("#predesigned_filters--bodyregion-mobile").find( ":selected" ).data( "customcat" ) ;        
                             if( custom_cat > 0 ) {
@@ -142,11 +140,46 @@
                             var cur_c = __page_request_values["c"] ;
                             var cur_c1 = __page_request_values["c1"] ;
                             var cur_f1 = __page_request_values["f1"] ;
+                            var cur_f2 = __page_request_values["f2"] ;
+                            var cur_f3 = __page_request_values["f3"] ;
                             var cur_f4 = __page_request_values["f4"] ;                                                                
-                            if( cur_c != oid || cur_c1 != custom_cat ) {  
+                            var cur_f5 = __page_request_values["f5"] ;                                                                
+                            if( cur_c != oid || cur_c1 != custom_cat ) {                                  
                                 setPageRequestValue( "c", oid ) ;    
-                                setPageRequestValue( "c1", custom_cat ) ; 
-                                current_index = 0 ;
+                                setPageRequestValue( "c1", custom_cat ) ;              
+                                if( custom_cat > 0 ) {                                    
+                                    if( cur_f1 > 0 ) { setPageRequestValue( "f1", 0 ) ; }
+                                    if( cur_f2 > 0 ) { setPageRequestValue( "f2", 0 ) ; }
+                                    if( cur_f3 > 0 ) { setPageRequestValue( "f3", 0 ) ; }
+                                    if( cur_f4 > 0 ) { setPageRequestValue( "f4", 0 ) ; }
+                                    if( cur_f5 > 0 ) { setPageRequestValue( "f5", 0 ) ; }
+                                    $("#predesigned_filters--conditions-mobile").val( 0 ).trigger( "change" ) ;
+                                    $("#predesigned_filters--types-mobile").val( 0 ).trigger( "change" ) ;
+                                    $("#predesigned_filters--difficulty-mobile").val( 0 ).trigger( "change" ) ;
+                                    $("#predesigned_filters--duration-mobile").val( 0 ).trigger( "change" ) ;
+                                    $("#predesigned_filters--equipment-mobile").val( 0 ).trigger( "change" ) ;    
+                                    var type_clear = $("#predesigned_filters--types-mobile").parent().find( ".mobile-filter--clear") ;
+                                    var cond_clear = $("#predesigned_filters--conditions-mobile").parent().find( ".mobile-filter--clear") ;
+                                    var diff_clear = $("#predesigned_filters--difficulty-mobile").parent().find( ".mobile-filter--clear") ;
+                                    var dur_clear = $("#predesigned_filters--duration-mobile").parent().find( ".mobile-filter--clear") ;
+                                    var equip_clear = $("#predesigned_filters--equipment-mobile").parent().find( ".mobile-filter--clear") ;
+
+                                    if( type_clear.hasClass( "active" ) ) { type_clear.removeClass( "active" ) ; }
+                                    if( cond_clear.hasClass( "active" ) ) { cond_clear.removeClass( "active" ) ; }
+                                    if( diff_clear.hasClass( "active" ) ) { diff_clear.removeClass( "active" ) ; }
+                                    if( dur_clear.hasClass( "active" ) ) { dur_clear.removeClass( "active" ) ; }
+                                    if( equip_clear.hasClass( "active" ) ) { equip_clear.removeClass( "active" ) ; }
+                                } else {                                                                                                             
+                                    if( cur_f4 > 0 ) { setPageRequestValue( "f4", 0 ) ; }
+                                    if( cur_f1 > 0 ) { setPageRequestValue( "f1", 0 ) ; }
+                                    $("#predesigned_filters--conditions-mobile").val( 0 ).trigger( "change" ) ;
+                                    $("#predesigned_filters--types-mobile").val( 0 ).trigger( "change" ) ;                                    
+                                    var type_clear = $("#predesigned_filters--types-mobile").parent( ).parent().find( ".mobile-filter--clear") ;
+                                    var cond_clear = $("#predesigned_filters--conditions-mobile").parent( ).parent().find( ".mobile-filter--clear") ;
+                                    if( type_clear.hasClass( "active" ) ) { type_clear.removeClass( "active" ) ; }
+                                    if( cond_clear.hasClass( "active" ) ) { cond_clear.removeClass( "active" ) ; }
+                                }                                                                                                
+                                current_index = 0 ;                                
                                 requestPrograms( ) ;                                                            
                                 if( $(".mobile-filter-panel").hasClass( "opened" ) ) {
                                     $(".mobile-filter-panel").removeClass( "opened" ) ;
@@ -183,14 +216,30 @@
                 var cur_c = __page_request_values["c"] ;
                 var cur_c1 = __page_request_values["c1"] ;
                 var cur_f1 = __page_request_values["f1"] ;
+                var cur_f2 = __page_request_values["f2"] ;
+                var cur_f3 = __page_request_values["f3"] ;
                 var cur_f4 = __page_request_values["f4"] ;                            
+                var cur_f5 = __page_request_values["f5"] ;                            
             	if( cur_c != oid || cur_c1 != custom_cat ) {
             		setPageRequestValue( "c", oid ) ;    
                     setPageRequestValue( "c1", custom_cat ) ;    
-            		if( cur_f4 > 0 ) { setPageRequestValue( "f4", 0 ) ; }
-            		if( cur_f1 > 0 ) { setPageRequestValue( "f1", 0 ) ; }
-            		$("#predesigned_filters--conditions").val( 0 ).trigger( "change" ) ;
-                    $("#predesigned_filters--types li").removeClass( "selected" ) ;
+                    if( custom_cat > 0 ) {
+                        if( cur_f1 > 0 ) { setPageRequestValue( "f1", 0 ) ; }
+                        if( cur_f2 > 0 ) { setPageRequestValue( "f2", 0 ) ; }
+                        if( cur_f3 > 0 ) { setPageRequestValue( "f3", 0 ) ; }
+                        if( cur_f4 > 0 ) { setPageRequestValue( "f4", 0 ) ; }
+                        if( cur_f5 > 0 ) { setPageRequestValue( "f5", 0 ) ; }                        
+                        $("#predesigned_filters--conditions").val( 0 ).trigger( "change" ) ;
+                        $("#predesigned_filters--equipment").val( 0 ).trigger( "change" ) ;
+                        $("#predesigned_filters--types li").removeClass( "selected" ) ;
+                        $("#predesigned_filters--difficulty li").removeClass( "selected" ) ;
+                        $("#predesigned_filters--duration li").removeClass( "selected" ) ;
+                    } else {
+                		if( cur_f4 > 0 ) { setPageRequestValue( "f4", 0 ) ; }
+                		if( cur_f1 > 0 ) { setPageRequestValue( "f1", 0 ) ; }
+                		$("#predesigned_filters--conditions").val( 0 ).trigger( "change" ) ;
+                        $("#predesigned_filters--types li").removeClass( "selected" ) ;
+                    }
                     current_index = 0 ;
                     requestPrograms( ) ;
                     $("ul.category-bubbles-list li").removeClass( "active-filter" ) ;
@@ -306,14 +355,14 @@
             }
             if( ( typeof __page_request_values["f5"] !== 'undefined' ) && __page_request_values["f5"] > 0 ) {
                 require_clear_all = true ;
-            }            
+            }    
+            if( ( typeof __page_request_values["c1"] !== 'undefined' ) && __page_request_values["c1"] > 1 ) {         
+                    require_clear_all = true ;      
+            }        
             if( _is_mobile ) {
                 if( ( typeof __page_request_values["c"] !== 'undefined' ) && __page_request_values["c"] > 0 ) {         
                         require_clear_all = true ;      
-                }
-                if( ( typeof __page_request_values["c1"] !== 'undefined' ) && __page_request_values["c1"] > 0 ) {         
-                        require_clear_all = true ;      
-                }
+                }                
             }    
 
             var $grid_filter_clear = $(".card--grid_filter_clear") ;        
@@ -358,10 +407,14 @@
         // 2.4 Clear all Selected Filters
         function clearAllFilters( e ) {
             if( $(".navbar-mobile--search_panel").css( "display" ) != "none" ) {
-                __page_request_values["c"] = 0 ;    
-                __page_request_values["c1"] = 0 ;    
-
+                __page_request_values["c"] = 0 ;                
+                __page_request_values["c1"] = 0 ;
             }
+            if( __page_request_values["c1"] > 0 ) {
+                __page_request_values["c1"] = 1 ;    
+            } else {
+                __page_request_values["c1"] = 0 ;
+            }            
             __page_request_values["f1"] = 0 ;
             __page_request_values["f2"] = 0 ;
             __page_request_values["f3"] = 0 ;
@@ -411,15 +464,20 @@
         // 2.6 Clear Filter Click Handler
         function handleClearFilter( e ) {
             var drop_down_id = $(this).parent( ).find( "select" ).attr( "id" ) ;
-            var param_f = $(this).parent( ).find( ".mobile-filter--value").data( "f" ) ;                        
-
-            $("#" + drop_down_id).val( 0 ).trigger( "change" ) ;
+            var param_f = $(this).parent( ).find( ".mobile-filter--value").data( "f" ) ;          
+            if( drop_down_id == "predesigned_filters--subcategories-mobile" || drop_down_id == "predesigned_filters--subcategories" ) {
+                $("#" + drop_down_id).val( 1 ).trigger( "change" ) ;
+            } else {                        
+                $("#" + drop_down_id).val( 0 ).trigger( "change" ) ;
+            }
             if( $(this).hasClass( "active" ) ) {
                 $(this).removeClass( "active" ) ;
             }   
             __page_request_values[param_f] = 0 ;    
             if( param_f == 'c' ) {
                 __page_request_values['c1'] = 0 ;    
+            } else if( param_f == 'c1' ) {
+                __page_request_values['c1'] = 1 ;    
             }
 
             if( drop_down_id == "predesigned_filters--conditions-mobile" ) {
@@ -427,7 +485,7 @@
                 if( $("#predesigned_filters--types-mobile").parent().parent().find(".mobile-filter--clear").hasClass( "active" ) ) {
                     $("#predesigned_filters--types-mobile").parent().parent().find(".mobile-filter--clear").removeClass( "active" ) ;
                 }   
-                __page_request_values["f1"] = 0 ;
+                __page_request_values["f1"] = 0 ;            
             } else if( drop_down_id == "predesigned_filters--types-mobile" ) {
                 $("#predesigned_filters--conditions-mobile").val( 0 ).trigger( "change" ) ;
                 if( $("#predesigned_filters--conditions-mobile").parent().parent().find(".mobile-filter--clear").hasClass( "active" ) ) {
@@ -489,8 +547,7 @@
             var $types_li = $("#predesigned_filters--types li") ;
             mtypes.select2( ) ; // Mobile Filter Drop Down            
             $types_li.unbind( "click" ).on( "click", function(){
-                var oid = $(this).data( "oid" ) ;
-                console.log( "Type Clicked" ) ;
+                var oid = $(this).data( "oid" ) ;                
                 if( typeof __page_request_values["f1"] !== "undefined" ) {
                     if( __page_request_values["f1"] != oid ) {
                         __page_request_values["f1"] = oid ;             
@@ -526,8 +583,8 @@
                 }                   
             });
 
-            mtypes.on('select2:select', function(e){
-                var oid = $("#predesigned_filters--types-mobile").val( ) ;      
+            mtypes.unbind( "select2:select" ).on('select2:select', function(e){
+                var oid = $("#predesigned_filters--types-mobile").val( ) ;                                          
                 if( typeof __page_request_values["f1"] !== "undefined" ) {
                     if( __page_request_values["f1"] != oid ) {
                         __page_request_values["f1"] = oid ;                             
@@ -545,9 +602,9 @@
                             if( !clear.hasClass( "active" ) ) { clear.addClass( "active" ) ; }
                         }               
                     } else {                
-                        if( __page_request_values["f1"] == 1 ) {
+                        if( __page_request_values["f1"] == 1 ) {                                                        
                             $("#predesigned_filters--conditions-mobile").val( 0 ).trigger( "change" ) ;
-                            __page_request_values["f4"] = 0 ;                   
+                            __page_request_values["f4"] = 0 ;                                           
                         }
                         __page_request_values["f1"] = 0 ;                                               
                         current_index = 0 ;
@@ -627,7 +684,7 @@
                 }           
             });
 
-            mdifficulty.on('select2:select', function(e){
+            mdifficulty.unbind( "select2:select" ).on('select2:select', function(e){
                 var oid = $("#predesigned_filters--difficulty-mobile").val( ) ;     
                 if( typeof __page_request_values["f2"] !== "undefined" ) {
                     if( __page_request_values["f2"] != oid ) {
@@ -723,7 +780,7 @@
                 }           
             });
 
-            mduration.on('select2:select', function(e){
+            mduration.unbind( "select2:select" ).on('select2:select', function(e){
                 var oid = $("#predesigned_filters--duration-mobile").val( ) ;       
                 if( typeof __page_request_values["f3"] !== "undefined" ) {
                     if( __page_request_values["f3"] != oid ) {
@@ -786,7 +843,7 @@
             }); 
             equipment.select2( ) ;
             mequipment.select2( ) ;
-            equipment.on('select2:select', function(e){
+            equipment.unbind( "select2:select" ).on('select2:select', function(e){
                 var oid = $("#predesigned_filters--equipment").val( ) ;
                 if( typeof __page_request_values["f5"] !== "undefined" ) {
                     if( __page_request_values["f5"] != oid ) {
@@ -817,7 +874,7 @@
                 }   
             });
 
-            mequipment.on('select2:select', function(e){
+            mequipment.unbind( "select2:select" ).on('select2:select', function(e){
                 var oid = $("#predesigned_filters--equipment-mobile").val( ) ;      
                 if( typeof __page_request_values["f5"] !== "undefined" ) {
                     if( __page_request_values["f5"] != oid ) {
@@ -889,7 +946,7 @@
             }); 
             conditions.select2( ) ;
             mconditions.select2( ) ;
-            conditions.on('select2:select', function(e){
+            conditions.unbind( "select2:select" ).on('select2:select', function(e){
                 var oid = $("#predesigned_filters--conditions").val( ) ;        
                 if( typeof __page_request_values["f4"] !== "undefined" ) {
                     if( __page_request_values["f4"] != oid ) {                        
@@ -931,12 +988,12 @@
                 }   
             });
 
-            mconditions.on('select2:select', function(e){
-                var oid = $("#predesigned_filters--conditions-mobile").val( ) ;     
+            mconditions.unbind( "select2:select" ).on('select2:select', function(e){
+                var oid = $("#predesigned_filters--conditions-mobile").val( ) ;                     
                 if( typeof __page_request_values["f4"] !== "undefined" ) {
                     if( __page_request_values["f4"] != oid ) {
                         __page_request_values["f4"] = oid ;                             
-                        __page_request_values["f1"] = 1 ; // Set Type to Condition Specific
+                        __page_request_values["f1"] = 1 ; // Set Type to Condition Specific                        
                         $("#predesigned_filters--types-mobile").val( 1 ).trigger( "change" ) ;
                         current_index = 0 ;
                         requestPrograms( ) ;
@@ -956,7 +1013,7 @@
                         if( !clear.hasClass( "active" ) ) { clear.addClass( "active" ) ; }
                     } else {                                
                         __page_request_values["f4"] = 0 ;           
-                        __page_request_values["f1"] = 1 ; // Set Type to Condition Specific
+                        __page_request_values["f1"] = 1 ; // Set Type to Condition Specific                        
                         $("#predesigned_filters--types-mobile").val( 1 ).trigger( "change" ) ;                                  
                         current_index = 0 ;
                         requestPrograms( ) ;
@@ -978,7 +1035,7 @@
                 } else {
                     __page_request_values["f4"] = oid ;                     
                     __page_request_values["f1"] = 1 ; // Set Type to Condition Specific
-                    $("#predesigned_filters--types-mobile").val( 1 ).trigger( "change" ) ;
+                    //$("#predesigned_filters--types-mobile").val( 1 ).trigger( "change" ) ;
                     current_index = 0 ;
                     requestPrograms( ) ;
                     // Close Filter Menu
@@ -1014,7 +1071,64 @@
             }
         }
 
-        /* 2.10 Set the filters based on the loaded criteria */
+        /* 2.10 Refresh the Custom Subcategories drop down filter */
+        function refreshSubcategoriesFilters( subcategories_data ) {
+            var subcategories = $("#predesigned_filters--subcategories") ;
+            var msubcategories = $("#predesigned_filters--subcategories-mobile") ;
+            var $grid_filter = $("#grid-filter") ;
+            var $mobile_filter_menu = $(".mobile-filter-panel")
+            subcategories.html( "<option selected value='1'>Filter by sub-category...</option>" ) ;
+            msubcategories.html( "<option selected value='1'>Filter by sub-category...</option>" ) ;
+            $.each( subcategories_data, function( index, value ) {
+                subcategories.append( value ) ;
+                msubcategories.append( value ) ;
+            }); 
+            subcategories.select2( ) ;
+            msubcategories.select2( ) ;
+            subcategories.on('select2:select', function(e){
+                var oid = $("#predesigned_filters--subcategories").val( ) ;                                
+                __page_request_values["c1"] = oid ;                         
+                if( $grid_filter.hasClass( "open" ) ) {
+                    $grid_filter.removeClass( "open" ) ;
+                }
+                current_index = 0 ;
+                requestPrograms( ) ;                
+            });
+
+            msubcategories.on('select2:select', function(e){
+                var oid = $("#predesigned_filters--subcategories-mobile").val( ) ;                     
+                __page_request_values["c1"] = oid ;                                     
+                current_index = 0 ;
+                requestPrograms( ) ;
+                // Close Filter Menu
+                if( $mobile_filter_menu.hasClass( "opened" ) ) {
+                    $mobile_filter_menu.removeClass( "opened" ) ;
+                }
+                // Clear button
+                var clear = msubcategories.parent( ).parent().find( ".mobile-filter--clear" ) ;
+                if( oid == 1 ) {
+                    if( clear.hasClass( "active" ) ) { clear.removeClass( "active" ) ; }            
+                } else {                                
+                    if( !clear.hasClass( "active" ) ) { clear.addClass( "active" ) ; }
+                }                
+            });
+            
+            if( ( typeof __page_request_values["c1"] !== 'undefined' ) && __page_request_values["c1"] > 1 ) {
+                $("#predesigned_filters--subcategories").val( __page_request_values["c1"] ).trigger( "change" ) ;          
+            }
+            $("#predesigned_filters--subcategories-mobile").val( __page_request_values["c1"] ).trigger( "change" ) ;
+            if( __page_request_values["c1"] > 1 ) {
+                if( !$("#predesigned_filters--subcategories-mobile").parent().parent().find( ".mobile-filter--clear" ).hasClass( "active" ) ) {
+                    $("#predesigned_filters--subcategories-mobile").parent().parent().find( ".mobile-filter--clear" ).addClass( "active" ) ;
+                }
+            } else {
+                if( $("#predesigned_filters--subcategories-mobile").parent().parent().find( ".mobile-filter--clear" ).hasClass( "active" ) ) {
+                    $("#predesigned_filters--subcategories-mobile").parent().parent().find( ".mobile-filter--clear" ).removeClass( "active" ) ;
+                }
+            }
+        }
+
+        /* 2.11 Set the filters based on the loaded criteria */
         function setFilters( ) {
             if( Object.keys( __page_request_values).length > 0 ) {
                 // Set the Body Region / Category bubbles
@@ -1114,6 +1228,23 @@
                     }
                 }
 
+                // Set the SUB-CATEGORIES Filter
+                $("#predesigned_filters--subcategories").val( 1 ).trigger( "change" ) ;
+                if( ( typeof __page_request_values["c1"] !== 'undefined' ) && __page_request_values["c1"] > 0 ) {
+                    $("#predesigned_filters--subcategories").val( __page_request_values["c1"] ).trigger( "change" ) ;          
+                }
+                
+                $("#predesigned_filters--subcategories-mobile").val( __page_request_values["c1"] ).trigger( "change" ) ;
+                if( __page_request_values["c1"] > 1 ) {
+                    if( !$("#predesigned_filters--subcategories-mobile").parent().parent().find( ".mobile-filter--clear" ).hasClass( "active" ) ) {
+                        $("#predesigned_filters--subcategories-mobile").parent().parent().find( ".mobile-filter--clear" ).addClass( "active" ) ;
+                    }
+                } else {
+                    if( $("#predesigned_filters--subcategories-mobile").parent().parent().find( ".mobile-filter--clear" ).hasClass( "active" ) ) {
+                        $("#predesigned_filters--subcategories-mobile").parent().parent().find( ".mobile-filter--clear" ).removeClass( "active" ) ;
+                    }
+                }
+
                 // Set the EQUIPMENT Filter
                 $("#predesigned_filters--equipment").val( 0 ).trigger( "change" ) ;
                 if( ( typeof __page_request_values["f5"] !== 'undefined' ) && __page_request_values["f5"] > 0 ) {
@@ -1174,6 +1305,14 @@
                     $("#predesigned_filters--conditions-mobile").parent().parent().find( ".mobile-filter--clear" ).removeClass( "active" ) ;
                 }
 
+                // Set the SUBCATEGORIES Filter
+                $("#predesigned_filters--subcategories").val( 0 ).trigger( "change" ) ;
+                
+                $("#predesigned_filters--subcategories-mobile").val( 0 ).trigger( "change" ) ;
+                if( $("#predesigned_filters--subcategories-mobile").parent().parent().find( ".mobile-filter--clear" ).hasClass( "active" ) ) {
+                    $("#predesigned_filters--subcategories-mobile").parent().parent().find( ".mobile-filter--clear" ).removeClass( "active" ) ;
+                }
+
                 // Set the EQUIPMENT Filter
                 $("#predesigned_filters--equipment").val( 0 ).trigger( "change" ) ;
                 
@@ -1184,6 +1323,73 @@
 
             }
         }
+
+        // 2.12 Load the Custom Category Filter Block
+        function toggleCustomCategoryFilters( ) {
+            var filter_drop_down = $(".grid-filter--drop_down") ;
+            var mfilter_drop_down_list = $("ul.mobile-filter-panel_list") ;
+            var c1 = __page_request_values["c1"] ;
+            if( c1 > 0 ) { // Display Sub-Categories drop down
+                // Desktop
+                if( !filter_drop_down.hasClass( "custom-category-displayed" ) ) {
+                    filter_drop_down.addClass( "custom-category-displayed" ) ;
+                }
+                if( !filter_drop_down.find( ".filter--drop_down_subcategories-wrapper" ).hasClass( "active" ) ) {
+                    filter_drop_down.find( ".filter--drop_down_subcategories-wrapper" ).addClass( "active" ) ;
+                }
+                if( filter_drop_down.find( ".filter--drop_down_conditions-wrapper" ).hasClass( "active" ) ) {
+                    filter_drop_down.find( ".filter--drop_down_conditions-wrapper" ).removeClass( "active" ) ;
+                }
+
+                // Mobile
+                if( mfilter_drop_down_list.find( "li.conditions-mobile_dropdown" ).hasClass( "active" ) ) {
+                    mfilter_drop_down_list.find( "li.conditions-mobile_dropdown" ).removeClass( "active" ) ;
+                }
+                if( !mfilter_drop_down_list.find( "li.subcategories-mobile_dropdown" ).hasClass( "active" ) ) {
+                    mfilter_drop_down_list.find( "li.subcategories-mobile_dropdown" ).addClass( "active" ) ;
+                }
+                if( !mfilter_drop_down_list.find( "li.types-mobile_dropdown" ).hasClass( "hide" ) ) {
+                    mfilter_drop_down_list.find( "li.types-mobile_dropdown" ).addClass( "hide" ) ;
+                }
+                if( !mfilter_drop_down_list.find( "li.difficulty-mobile_dropdown" ).hasClass( "hide" ) ) {
+                    mfilter_drop_down_list.find( "li.difficulty-mobile_dropdown" ).addClass( "hide" ) ;
+                }
+                if( !mfilter_drop_down_list.find( "li.duration-mobile_dropdown" ).hasClass( "hide" ) ) {
+                    mfilter_drop_down_list.find( "li.duration-mobile_dropdown" ).addClass( "hide" ) ;
+                }
+            } else { // Display Conditions Drop Down
+                // Desktop
+                if( filter_drop_down.hasClass( "custom-category-displayed" ) ) {
+                    filter_drop_down.removeClass( "custom-category-displayed" ) ;
+                }
+                if( filter_drop_down.find( ".filter--drop_down_subcategories-wrapper" ).hasClass( "active" ) ) {
+                    filter_drop_down.find( ".filter--drop_down_subcategories-wrapper" ).removeClass( "active" ) ;
+                }
+                if( !filter_drop_down.find( ".filter--drop_down_conditions-wrapper" ).hasClass( "active" ) ) {
+                    filter_drop_down.find( ".filter--drop_down_conditions-wrapper" ).addClass( "active" ) ;
+                }                
+
+                // Mobile
+                if( !mfilter_drop_down_list.find( "li.conditions-mobile_dropdown" ).hasClass( "active" ) ) {
+                    mfilter_drop_down_list.find( "li.conditions-mobile_dropdown" ).addClass( "active" ) ;
+                }
+                if( mfilter_drop_down_list.find( "li.subcategories-mobile_dropdown" ).hasClass( "active" ) ) {
+                    mfilter_drop_down_list.find( "li.subcategories-mobile_dropdown" ).removeClass( "active" ) ;
+                }
+                if( mfilter_drop_down_list.find( "li.types-mobile_dropdown" ).hasClass( "hide" ) ) {
+                    mfilter_drop_down_list.find( "li.types-mobile_dropdown" ).removeClass( "hide" ) ;
+                }
+                if( mfilter_drop_down_list.find( "li.types-mobile_dropdown" ).hasClass( "hide" ) ) {
+                    mfilter_drop_down_list.find( "li.types-mobile_dropdown" ).removeClass( "hide" ) ;
+                }
+                if( mfilter_drop_down_list.find( "li.difficulty-mobile_dropdown" ).hasClass( "hide" ) ) {
+                    mfilter_drop_down_list.find( "li.difficulty-mobile_dropdown" ).removeClass( "hide" ) ;
+                }
+                if( mfilter_drop_down_list.find( "li.duration-mobile_dropdown" ).hasClass( "hide" ) ) {
+                    mfilter_drop_down_list.find( "li.duration-mobile_dropdown" ).removeClass( "hide" ) ;
+                }
+            }
+        }        
 
 // **********************************************************************************
 // 3.0 SEARCH / SEARCH BAR METHODS
@@ -1373,7 +1579,8 @@
             $.ajax({
                 type: "GET",
                 crossDomain: true,
-                headers: { 'token-authorization-x': options["api_key"], 'ptlinked-uid-x': options["user_uid"], 'ptlinked-utype-x': options["user_type"] }, 
+                headers: { 'token-authorization-x': options["api_key"], 'ptlinked-uid-x': options["user_uid"], 
+                            'ptlinked-utype-x': options["user_type"] }, 
                 url: url,                
                 dataType: "json",
                 error: function( jqXHR, textStatus, errorThrown ) {
@@ -1391,14 +1598,18 @@
                 success: function( data, textStatus, jqXHR ) {                      
                     var status = jqXHR["status"] ;
                     if( status == 200 ) {
-                        renderPrograms( data );                        
+                        renderPrograms( data );                                                
+                        toggleCustomCategoryFilters( ) ;
                         refreshConditionFilters( data["conditions"] ) ;   
+                        refreshSubcategoriesFilters( data["subcategories"] ) ;
                         if( !__error_detected ) {
                             toggle_info_box( "predesigned--results_display" ) ;                        
                         }
                     } else if( status == 201 ) {                   
-                        processLoadMore(0, 0);                             
+                        processLoadMore(0, 0);          
+                        toggleCustomCategoryFilters( ) ;                   
                         refreshConditionFilters( data["conditions"] ) ;                                   
+                        refreshSubcategoriesFilters( data["subcategories"] ) ;
                         if( !__error_detected ) {
                             toggle_info_box( "predesigned--no_results_display" ) ;                        
                         }
@@ -1480,9 +1691,15 @@
         /* 3.5 Open selected exercise program */
         function open_exercise_program( e ) {
             var exercise_program_id = $(this).data( "epid" ) ;
+            var exercise_program_code = $(this).data( "code" ) ;
+            var exercise_program_title = $(this).find( ".cards--program_title").text( ) ;
             if( exercise_program_id > 0 ) {
                 __exercise_program_id = exercise_program_id ;
                 loadExerciseProgram( ) ;
+                var data = [];
+                data["title"] = exercise_program_title ;
+                data["url"] =  options["app_root_url"] + "?e=" + exercise_program_code ;                
+                hook('onViewExerciseProgram', data);
             }            
         }
 
@@ -1516,7 +1733,8 @@
             $.ajax({
                 type: "GET",
                 crossDomain: true,
-                headers: { 'token-authorization-x': options["api_key"], 'ptlinked-uid-x': options["user_uid"], 'ptlinked-utype-x': options["user_type"] }, 
+                headers: { 'token-authorization-x': options["api_key"], 'ptlinked-uid-x': options["user_uid"], 
+                            'ptlinked-utype-x': options["user_type"], 'ptlinked-videobg-x': options["video_bg"] }, 
                 url: url,                
                 dataType: "json",
                 error: function( jqXHR, textStatus, errorThrown ) {
@@ -1550,7 +1768,8 @@
             $.ajax({
                 type: "GET",
                 crossDomain: true,
-                headers: { 'token-authorization-x': options["api_key"], 'ptlinked-uid-x': options["user_uid"], 'ptlinked-utype-x': options["user_type"] }, 
+                headers: { 'token-authorization-x': options["api_key"], 'ptlinked-uid-x': options["user_uid"], 
+                            'ptlinked-utype-x': options["user_type"] }, 
                 url: url,                
                 dataType: "json",
                 error: function( jqXHR, textStatus, errorThrown ) {
@@ -1581,6 +1800,7 @@
         // 4.3 Render the exercise Program
         function renderExerciseProgram( d ) {            
             $("h1.viewer--header__title").html( d["meta"]["title"] ) ;
+            __exercise_program_code = d["meta"]["code"] ;
             $("#workout-preview__thumbslider").html( d["thumbnails"] ) ;
             $("#viewer--exercise_container_wrapper").html( "" ) ;
             for( var i = 0 ; i < d["exercises"].length ; i ++ ) {
@@ -1758,6 +1978,11 @@
                     success: function( data, textStatus, jqXHR ) {                      
                         var status = jqXHR["status"] ;                        
                         if( status == 200 ) {
+                            var data = [];
+                            data["exercise_program_link"] = options["app_root_url"] + "?e=" + __exercise_program_code ;
+                            data["user_id"] = options["user_uid"] ;
+                            data["exercise_program_title"] = $(".ptlinked--exercise_program_viewer").find("h1.viewer--header__title").text( ) ;                            
+                            hook('onSaveProgram', data);
                             display_dialog( "Program Saved", "The exercise program has been successfully saved to your \"My Favorites\" folder." ) ;
                         } else if( status == 201 ) {                
                             display_dialog( "Program Already Saved", "The exercise program has already been saved to your \"My Favorites\" folder." ) ;
@@ -1769,9 +1994,9 @@
             $(".btn-print_program").unbind( "click" ).on( "click", function(e) {                
                 var url = options["api_root_url"] + "/exerciseprogram/print/" + __exercise_program_id + "-" + options["user_uid"] ;   
                 var data = {} ;
-                data["exercise_program_link"] = options["app_root_url"] + "?e=" + __exercise_program_id ;
+                data["exercise_program_link"] = options["app_root_url"] + "?e=" + __exercise_program_code ;
                 data["user_id"] = options["user_uid"] ;
-                data["exercise_program_title"] = $("h1.viewer--header__title").text( ) ;
+                data["exercise_program_title"] = $(".ptlinked--exercise_program_viewer").find("h1.viewer--header__title").text( ) ;
                 hook('onPrintProgram', data);
                 window.open( url, "PDF Viewer" ) ;         
                 track_print( ) ;       
@@ -1801,7 +2026,7 @@
                     success: function( data, textStatus, jqXHR ) {                      
                         var status = jqXHR["status"] ;                                                
                         var data = {} ;
-                        data["exercise_program_link"] = options["app_root_url"] + "?e=" + __exercise_program_id ;
+                        data["exercise_program_link"] = options["app_root_url"] + "?e=" + __exercise_program_code ;
                         data["exercise_program_title"] = $("h1.viewer--header__title").text( ) ;
                         hook('onSendProgram', data);
                     }        
@@ -1908,7 +2133,8 @@
                                     '<div class="container">' +
                                         '<div class="grid-filter--option_wrapper">' +
                                             '<div class="col-6 padding-right-50">' +
-                                                '<select style="width: 100%; font-size: 1.4rem; height: 2.5rem;" id="predesigned_filters--conditions"></select>' +
+                                                '<div class="filter--drop_down_conditions-wrapper active"><select style="width: 100%; font-size: 1.4rem; height: 2.5rem;" id="predesigned_filters--conditions"></select></div>' +
+                                                '<div class="filter--drop_down_subcategories-wrapper"><select style="width: 100%; font-size: 1.4rem; height: 2.5rem;" id="predesigned_filters--subcategories"></select></div>' +
                                             '</div>' +
                                             '<div class="col-6 padding-right-50">' +
                                                 '<select style="width: 100%; font-size: 1.4rem; height: 2.5rem;" id="predesigned_filters--equipment"></select>' +
@@ -2000,11 +2226,12 @@
                 '<ul class="mobile-filter-panel_list">' +
                     '<li class="double-divider" id="mbtn-close_filter_menu">X&nbsp;&nbsp;Filter<span class="mobile--grid_filter_clear float-right" id="mobile--filter_clear">Clear filters<i class="fas fa-times-circle ml-3 mr-0"></i></span></li>' +
                     '<li class="single-divider"><div class="mobile-filter--label">Body Region:</div><div class="mobile-filter--value" data-f="c"><select style="width: 100%; font-size: 1.4rem; height: 2.5rem;" id="predesigned_filters--bodyregion-mobile"></select></div><div class="mobile-filter--clear" title="Clear body region filter" data-toggle="tooltip">X</div></li>' +
-                    '<li class="single-divider"><div class="mobile-filter--label">Condition:</div><div class="mobile-filter--value" data-f="f4"><select style="width: 100%; font-size: 1.4rem; height: 2.5rem;" id="predesigned_filters--conditions-mobile"></select></div><div class="mobile-filter--clear" title="Clear condition filter" data-toggle="tooltip">X</div></li>' +
-                    '<li class="single-divider"><div class="mobile-filter--label">Type:</div><div class="mobile-filter--value" data-f="f1"><select style="width: 100%; font-size: 1.4rem; height: 2.5rem;" id="predesigned_filters--types-mobile"></select></div><div class="mobile-filter--clear" title="Clear type filter" data-toggle="tooltip">X</div></li>' +
-                    '<li class="single-divider"><div class="mobile-filter--label">Difficulty:</div><div class="mobile-filter--value" data-f="f2"><select style="width: 100%; font-size: 1.4rem; height: 2.5rem;" id="predesigned_filters--difficulty-mobile"></select></div><div class="mobile-filter--clear" title="Clear difficulty filter" data-toggle="tooltip">X</div></li>' +
-                    '<li class="single-divider"><div class="mobile-filter--label">Equipment:</div><div class="mobile-filter--value" data-f="f5"><select style="width: 100%; font-size: 1.4rem; height: 2.5rem;" id="predesigned_filters--equipment-mobile"></select></div><div class="mobile-filter--clear" title="Clear equipment filter" data-toggle="tooltip">X</div></li>' +
-                    '<li class="single-divider"><div class="mobile-filter--label">Duration:</div><div class="mobile-filter--value" data-f="f3"><select style="width: 100%; font-size: 1.4rem; height: 2.5rem;" id="predesigned_filters--duration-mobile"></select></div><div class="mobile-filter--clear" title="Clear duration filter" data-toggle="tooltip">X</div></li>' +                    
+                    '<li class="single-divider conditions-mobile_dropdown active"><div class="mobile-filter--label">Condition:</div><div class="mobile-filter--value" data-f="f4"><select style="width: 100%; font-size: 1.4rem; height: 2.5rem;" id="predesigned_filters--conditions-mobile"></select></div><div class="mobile-filter--clear" title="Clear condition filter" data-toggle="tooltip">X</div></li>' +
+                    '<li class="single-divider subcategories-mobile_dropdown"><div class="mobile-filter--label">Sub-Category:</div><div class="mobile-filter--value" data-f="c1"><select style="width: 100%; font-size: 1.4rem; height: 2.5rem;" id="predesigned_filters--subcategories-mobile"></select></div><div class="mobile-filter--clear" title="Clear sub-category filter" data-toggle="tooltip">X</div></li>' +
+                    '<li class="single-divider types-mobile_dropdown"><div class="mobile-filter--label">Type:</div><div class="mobile-filter--value" data-f="f1"><select style="width: 100%; font-size: 1.4rem; height: 2.5rem;" id="predesigned_filters--types-mobile"></select></div><div class="mobile-filter--clear" title="Clear type filter" data-toggle="tooltip">X</div></li>' +
+                    '<li class="single-divider difficulty-mobile_dropdown"><div class="mobile-filter--label">Difficulty:</div><div class="mobile-filter--value" data-f="f2"><select style="width: 100%; font-size: 1.4rem; height: 2.5rem;" id="predesigned_filters--difficulty-mobile"></select></div><div class="mobile-filter--clear" title="Clear difficulty filter" data-toggle="tooltip">X</div></li>' +
+                    '<li class="single-divider equipment-mobile_dropdown"><div class="mobile-filter--label">Equipment:</div><div class="mobile-filter--value" data-f="f5"><select style="width: 100%; font-size: 1.4rem; height: 2.5rem;" id="predesigned_filters--equipment-mobile"></select></div><div class="mobile-filter--clear" title="Clear equipment filter" data-toggle="tooltip">X</div></li>' +
+                    '<li class="single-divider duration-mobile_dropdown"><div class="mobile-filter--label">Duration:</div><div class="mobile-filter--value" data-f="f3"><select style="width: 100%; font-size: 1.4rem; height: 2.5rem;" id="predesigned_filters--duration-mobile"></select></div><div class="mobile-filter--clear" title="Clear duration filter" data-toggle="tooltip">X</div></li>' +                    
                 '</ul>' +
             '</div>' ;
 
@@ -2348,9 +2575,7 @@
             } else {
                 h_page_header = Math.round( $("." + options["header_element_class"].trim( ) ).outerHeight( ) ) ;
             }
-            if( options["debug_mode"] ) {
-                console.log( "Page Header Height: " + h_page_header ) ;
-            }
+            if( options["debug_mode"] ) { console.log( "----- Calculated Page Header Height: " + h_page_header ) ; }
             var h_full_page = Math.round( $("body").outerHeight( ) ) ;
             var h_plugin_container = Math.round( h_full_page - h_page_header ) ;
             $el.css( "height", h_plugin_container ) ;
@@ -2540,6 +2765,7 @@
         api_root_url: '',                                           // The root URL to the PTLINKED api
         api_key: '',                                                // Customer (MDVIP) API Key
         app_root_url: 'https://mdvip-plugin.ptlinked.com/test',     // URL of where plugin is being used        
+        video_bg: 'white',                                          // The BG color of the exercise video and images (white, grey, blue)        
         header_element_class: 'site-header',                        // Plugin page header class
         viewer_header_element_class: 'viewer--header',              // Plugin exercise program viewer header class
         viewer_thumb_scroller_class: 'viewer--header_bar',          // Plugin exercise program viewer thumbnail slider class
@@ -2547,10 +2773,12 @@
 
 		onInit: function() {},                                      // On plugin initialization callback
 		onDestroy: function() {},                                   // On plugin destroy callback
-        onSendProgram: function(data) {},                               // On Send Exercise Program callback
-        onSaveProgram: function(data) {},                               // On Save Exercise Program callback
-        onPrintProgram: function(data) {},                              // On Print Exercise Program callback
-        onShowDialog: function(data) {}                                 // Triggered when a dialog box needs to be displayed
+        onSendProgram: function(data) {},                           // On Send Exercise Program callback
+        onSaveProgram: function(data) {},                           // On Save Exercise Program callback
+        onPrintProgram: function(data) {},                          // On Print Exercise Program callback
+        onShowDialog: function(data) {},                            // Triggered when a dialog box needs to be displayed
+        onViewExerciseProgram: function(data) {}                    // Triggered when a user clicks on an exercise program to view it
+
 	};
 	
 })(jQuery);
