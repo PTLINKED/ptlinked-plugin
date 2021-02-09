@@ -1,12 +1,19 @@
 {
-        "name": "ptlinked/ptlinked-plugin",
-        "type": "package",
-        "package": {
-            "name": "ptlinked/ptlinked-plugin",            
-            "type": "library",
-            "dist": {
-                "url": "https://github.com/PTLINKED/ptlinked-plugin/archive/v1.0.1.tar.gz",
-                "type": "zip"
-            }
-        }
+  "name": "ptlinked/ptlinked-plugin",
+  "type": "component",
+  "description": "jQuery PTLINKED Exercise Library Plugin",
+  "homepage": "http://www.www.ptlinked.com/",  
+  "extra": {
+    "component": {
+      "scripts": [
+        "dist/jquery-ptlinked_plugin.min.js"
+      ],
+      "files": [
+        "dist/jquery-ptlinked_plugin.js",
+        "dist/jquery-ptlinked_plugin.min.js",
+        "dist/ptlinked_plugin.min.css",
+        "dist/ptlinked_plugin.css"
+      ]
     }
+  }
+}
