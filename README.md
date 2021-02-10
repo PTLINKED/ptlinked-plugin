@@ -104,22 +104,23 @@ var ptlinked_plugin = $("#ptlinked--application_container").ptlinkedLibrary({
 
 	api_root_url: 'https://api-{deployment_name}.ptlinked.com',
 
-	// rest of the options here
-	...
+	app_root_url: 'https://{web_site_url}/{page_plugin_is_installed_on}',
 
-	onInit: function() { 
+	user_uid: '{unique_user_identifier}',
 
-		console.log( "Plugin is initialization and ready to go." ) ;
-		
-	},
+	user_type: '{physician || patient || support || other}',
 
-	onSendProgram: function( data ) {
+	header_element_class: 'site-header,site-nav-wrapper',
 
-		console.log( "Title of the Exercise Program: " + data["exercise_program_title"] ) ;
+	save_favorites: '{true || false}',
 
-		console.log( "Direct Link to Exercise Program: " + data["exercise_program_link"] ) ;
+	secure_messaging: '{true || false}',
 
-	}
+	training_mode: '{true || false}',
+
+	debug_mode: '{true || false}',
+
+	dialog_box_type: '{jquery || hook}'
 
 }) ;
 ```
