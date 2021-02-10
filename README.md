@@ -40,7 +40,7 @@ To install the plugin you will need to define the GitHub repository URL in the c
 		"type": "vcs",
 
 		"url": "https://github.com/ptlinked/ptlinked-plugin"
-		
+
 	}
 ]
 
@@ -99,11 +99,29 @@ new ptlinkedLibrary( element[, options] )
 ```js
 // Initialize the plugin
 var ptlinked_plugin = $("#ptlinked--application_container").ptlinkedLibrary({
+
 	api_key: {assigned_api_key},
+
 	api_root_url: 'https://api-{deployment_name}.ptlinked.com',
+
 	app_root_url: 'https://{web_site_url}/{page_plugin_is_installed_on}',
-	user_uid: 1,
-	user_type: 'physician'
+
+	user_uid: '{unique_user_identifier}',
+
+	user_type: '{physician || patient || support || other}',
+
+	header_element_class: 'site-header,site-nav-wrapper',
+
+	save_favorites: '{true || false}',
+
+	secure_messaging: '{true || false}',
+
+	training_mode: '{true || false}',
+
+	debug_mode: '{true || false}',
+
+	dialog_box_type: '{jquery || hook}'
+
 }) ;
 ```
 
