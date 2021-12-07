@@ -2,5 +2,7 @@
 sftp-config.json
 favicon.ico
 composer.json.old
+/vendor/
 examples/MDVIP/js/main.js
 examples/MDVIP-1.0.2/js/main.js
+examples/MDVIP-1.0.1/js/main.js

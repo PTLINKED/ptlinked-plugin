@@ -1,19 +1,6 @@
 {
-  "name": "ptlinked/ptlinked-plugin",
-  "type": "component",
-  "description": "jQuery PTLINKED Exercise Library Plugin",
-  "homepage": "http://www.ptlinked.com/",  
-  "extra": {
-    "component": {
-      "scripts": [
-        "dist/v1.0.2/jquery-ptlinked_plugin.1.0.2.min.js"
-      ],
-      "files": [
-        "dist/v1.0.2/jquery-ptlinked_plugin.1.0.2.js",
-        "dist/v1.0.2/jquery-ptlinked_plugin.1.0.2.min.js",
-        "dist/v1.0.2/ptlinked_plugin.1.0.2.min.css",
-        "dist/v1.0.2/ptlinked_plugin.1.0.2.css"
-      ]
-    }
-  }
+    "name": "ptlinked/ptlinked-plugin",
+    "description": "PTLINKED Exercise program jquery plugin.",
+    "type": "library",
+    "require": {}
 }
