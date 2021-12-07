@@ -3,7 +3,7 @@ var ptlinked_app = null ;
 $(document).ready( function(){
 	
 	ptlinked_app = $("#ptlinked--application_container").ptlinkedLibrary({
-		api_key: '24a44cd0db05673a1965cea32662be92',//'3D3E90AFFC9D47B5C161E6F6750D459D',//'e7ae8a7a7be9491c063674a79a657de9',
+		api_key: '',
 		api_root_url: 'https://api-mdvip.ptlinked.com',
 		app_root_url: 'https://mdvip-plugin.ptlinked.com/examples/MDVIP-1.0.1',		
 		save_favorites: true,
