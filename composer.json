@@ -2,7 +2,7 @@
   "name": "ptlinked/ptlinked-plugin",
   "type": "component",
   "description": "jQuery PTLINKED Exercise Library Plugin",
-  "homepage": "http://www.www.ptlinked.com/",  
+  "homepage": "http://www.ptlinked.com/",  
   "extra": {
     "component": {
       "scripts": [
