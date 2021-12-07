@@ -12,7 +12,7 @@ $(document).ready( function(){
 		debug_mode: true,
 		video_bg: 'white',		
 		user_type: 'physician',
-		user_uid: '00544000008eQ06AAE',				
+		user_uid: '',				
         header_element_class: 'site-header',
         viewer_header_element_class: 'viewer--header',
         viewer_thumb_scroller_class: 'viewer--header_bar',
