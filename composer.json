@@ -6,13 +6,13 @@
   "extra": {
     "component": {
       "scripts": [
-        "dist/jquery-ptlinked_plugin.min.js"
+        "dist/v1.0.2/jquery-ptlinked_plugin.1.0.2.min.js"
       ],
       "files": [
-        "dist/jquery-ptlinked_plugin.js",
-        "dist/jquery-ptlinked_plugin.min.js",
-        "dist/ptlinked_plugin.min.css",
-        "dist/ptlinked_plugin.css"
+        "dist/v1.0.2/jquery-ptlinked_plugin.1.0.2.js",
+        "dist/v1.0.2/jquery-ptlinked_plugin.1.0.2.min.js",
+        "dist/v1.0.2/ptlinked_plugin.1.0.2.min.css",
+        "dist/v1.0.2/ptlinked_plugin.1.0.2.css"
       ]
     }
   }
