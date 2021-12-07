@@ -1,7 +1,7 @@
  /**
  * PTLINKED Plugin - Exercise Program Library
  * Customer: MDVIP
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: Mike Frank (PTLINKED, LLC.) - mfrank@ptlinked.com
  * 
  * Table of Contents
@@ -23,7 +23,10 @@
  *       2.7 Load the Filters
  *       2.8 Render the Filter Components
  *       2.9 Refresh the Conditions drop down filter
- *       2.10 Set the filters based on the loaded criteria
+ *       2.10 Refresh the Custom Subcategories drop down filter
+ *       2.11 Set the filters based on the loaded criteria
+ *       2.12 Load the Custom Category Filter Block
+ *       2.13 Add/Remove bubbles from filter breadcrumb
  *  3.0 SEARCH / SEARCH BAR METHODS
  *       3.1 Initialize the textual search bar
  *       3.2 Request Exercise Programs
@@ -77,6 +80,9 @@
 		options = $.extend({}, $.fn[pluginName].defaults, options);
 
 		var selected_category_filter = 0 ;     // Selected category Filter
+        var selected_filters = {} ;            // Selected Filters
+        var __filter_timer ;                   // Filter timer variable
+        var __filter_delay = 500 ;             // The set delay before the filter menu is displayed
         var __page_request_values = {} ;       // Page URL Parameters Array
         var __page_request_query_values = {} ;
         var __use_url_to_load = false ;        // Flag to use URL loading of search and filters *** REMOVE ***
@@ -88,9 +94,9 @@
         var current_index = 0 ;                // Current page index
         var record_chunks = 25 ;               // Number of records to return
         var __exercise_program_id = 0 ;        // Currently selected exercise program id to display in viewer
-        var __exercise_program_code = '' ;      // Currently selected exercise program code to display in viewer
-
+        var __exercise_program_code = '' ;     // Currently selected exercise program code to display in viewer
         var __error_detected = false ;
+        var __bodyregion_info = {} ;
 		
 
 
@@ -102,7 +108,7 @@
 		function loadCategories( ) {			
             var url = options["api_root_url"] + "/predesigned/bodyregions/html" ; 
             var s = getBootstrapDeviceSize( );
-            if( s == "xs" || s == "sm" || s == "md" ) {
+            if( s == "xs" || s == "sm" || s == "md" || s == "lg" ) {
                 url = options["api_root_url"] + "/predesigned/bodyregions/html2" ; 
             }
             $.ajax({
@@ -124,12 +130,17 @@
                     toggle_info_box( "predesigned--sys_error", "CAT" + jqXHR["status"] + " - " + jqXHR["statusText"] ) ;
                 },
                 success: function( data, textStatus, jqXHR ) {                      
-                    var s = getBootstrapDeviceSize( ) ;
-                    if( s == "xs" || s == "sm" || s == "md" ) {                                 
+                    var s = getBootstrapDeviceSize( ) ;                    
+                    if( s == "xs" || s == "sm" || s == "md" || s == "lg" ) {                                 
                         var mbodyregion = $("#predesigned_filters--bodyregion-mobile") ;                                
                         $.each( data, function( index, value ) {                    
                             mbodyregion.append( value ) ;
                         });                        
+                        var highlight_image = "/examples/MDVIP-1.0.1/images/bodyregion_highlights/bodyregion--empty.png" ;
+                        var title_label = "All Programs" ;
+                        $(".ptlinked--m_bodyregion_highlight").find( "img" ).attr( "src", highlight_image ) ;
+                        $(".ptlinked--m_bodyregion_highlight").find( ".highlight-label" ).html( title_label ) ;     
+                        $(".ptlinked--m_bodyregion_highlight").show( ) ;
                         mbodyregion.select2( ) ;                        
                         mbodyregion.unbind( "select2:select").on('select2:select', function(e){
                             var oid = $("#predesigned_filters--bodyregion-mobile").val( ) ;       
@@ -137,56 +148,69 @@
                             if( custom_cat > 0 ) {
                                 oid = oid.replace( "c-", "" ) ;
                             }
+                            var title = $("#predesigned_filters--bodyregion-mobile").find(":selected").data("title") ;
+                            var type = $("#predesigned_filters--bodyregion-mobile").find(":selected").data("type") ;
                             var cur_c = __page_request_values["c"] ;
                             var cur_c1 = __page_request_values["c1"] ;
-                            var cur_f1 = __page_request_values["f1"] ;
-                            var cur_f2 = __page_request_values["f2"] ;
-                            var cur_f3 = __page_request_values["f3"] ;
-                            var cur_f4 = __page_request_values["f4"] ;                                                                
-                            var cur_f5 = __page_request_values["f5"] ;                                                                
-                            if( cur_c != oid || cur_c1 != custom_cat ) {                                  
-                                setPageRequestValue( "c", oid ) ;    
-                                setPageRequestValue( "c1", custom_cat ) ;              
-                                if( custom_cat > 0 ) {                                    
+                            var cur_f1 = __page_request_values["f1"] ;                            
+                            var cur_f4 = __page_request_values["f4"] ;       
+                            if( cur_c != oid || cur_c1 != custom_cat ) {     
+                                if( oid == 0 ) { filter_breadcrumb( cur_c, '', 'bodyregion', 'remove' ) ; }                             
+                                setPageRequestValue( "c", oid ) ;
+                                setPageRequestValue( "c1", custom_cat ) ;
+                                if( custom_cat > 0 ) {
+                                    filter_breadcrumb( __page_request_values["f4"], "", "condition", 'remove' ) ;                        
+                                    filter_breadcrumb( __page_request_values["f1"], "", "type", 'remove' ) ;
                                     if( cur_f1 > 0 ) { setPageRequestValue( "f1", 0 ) ; }
-                                    if( cur_f2 > 0 ) { setPageRequestValue( "f2", 0 ) ; }
-                                    if( cur_f3 > 0 ) { setPageRequestValue( "f3", 0 ) ; }
                                     if( cur_f4 > 0 ) { setPageRequestValue( "f4", 0 ) ; }
-                                    if( cur_f5 > 0 ) { setPageRequestValue( "f5", 0 ) ; }
-                                    $("#predesigned_filters--conditions-mobile").val( 0 ).trigger( "change" ) ;
-                                    $("#predesigned_filters--types-mobile").val( 0 ).trigger( "change" ) ;
-                                    $("#predesigned_filters--difficulty-mobile").val( 0 ).trigger( "change" ) ;
-                                    $("#predesigned_filters--duration-mobile").val( 0 ).trigger( "change" ) ;
-                                    $("#predesigned_filters--equipment-mobile").val( 0 ).trigger( "change" ) ;    
-                                    var type_clear = $("#predesigned_filters--types-mobile").parent().find( ".mobile-filter--clear") ;
-                                    var cond_clear = $("#predesigned_filters--conditions-mobile").parent().find( ".mobile-filter--clear") ;
-                                    var diff_clear = $("#predesigned_filters--difficulty-mobile").parent().find( ".mobile-filter--clear") ;
-                                    var dur_clear = $("#predesigned_filters--duration-mobile").parent().find( ".mobile-filter--clear") ;
-                                    var equip_clear = $("#predesigned_filters--equipment-mobile").parent().find( ".mobile-filter--clear") ;
-
-                                    if( type_clear.hasClass( "active" ) ) { type_clear.removeClass( "active" ) ; }
-                                    if( cond_clear.hasClass( "active" ) ) { cond_clear.removeClass( "active" ) ; }
-                                    if( diff_clear.hasClass( "active" ) ) { diff_clear.removeClass( "active" ) ; }
-                                    if( dur_clear.hasClass( "active" ) ) { dur_clear.removeClass( "active" ) ; }
-                                    if( equip_clear.hasClass( "active" ) ) { equip_clear.removeClass( "active" ) ; }
-                                } else {                                                                                                             
-                                    if( cur_f4 > 0 ) { setPageRequestValue( "f4", 0 ) ; }
-                                    if( cur_f1 > 0 ) { setPageRequestValue( "f1", 0 ) ; }
                                     $("#predesigned_filters--conditions-mobile").val( 0 ).trigger( "change" ) ;
                                     $("#predesigned_filters--types-mobile").val( 0 ).trigger( "change" ) ;                                    
-                                    var type_clear = $("#predesigned_filters--types-mobile").parent( ).parent().find( ".mobile-filter--clear") ;
-                                    var cond_clear = $("#predesigned_filters--conditions-mobile").parent( ).parent().find( ".mobile-filter--clear") ;
-                                    if( type_clear.hasClass( "active" ) ) { type_clear.removeClass( "active" ) ; }
-                                    if( cond_clear.hasClass( "active" ) ) { cond_clear.removeClass( "active" ) ; }
-                                }                                                                                                
+                                    var highlight_image = "/examples/MDVIP-1.0.1/images/bodyregion_highlights/bodyregion--empty.png" ;
+                                    var title_label = title ;
+                                    $(".ptlinked--m_bodyregion_highlight").find( "img" ).attr( "src", highlight_image ) ;
+                                    $(".ptlinked--m_bodyregion_highlight").find( ".highlight-label" ).html( title_label ) ;     
+                                    $(".ptlinked--m_bodyregion_highlight").show( ) ;   
+                                } else {
+                                    filter_breadcrumb( __page_request_values["f4"], "", "condition", 'remove' ) ;
+                                    if( cur_f4 > 0 ) { setPageRequestValue( "f4", 0 ) ; }
+                                    var __item_found = false ;
+                                    __bodyregion_info[oid]["types"].forEach( function(item, index, arr){
+                                        if( item["type_id"] == cur_f1 ) {
+                                            __item_found = true ;
+                                        }
+                                    });
+                                    if( !__item_found ){ 
+                                        // Remove BreadCrumb
+                                        filter_breadcrumb( __page_request_values["f1"], "", "type", 'remove' ) ;
+                                        if( cur_f1 > 0 ) { setPageRequestValue( "f1", 0 ) ; }
+                                        $("#predesigned_filters--types-mobile").val( 0 ).trigger( "change" ) ;                                        
+                                    }                        
+                                    $("#predesigned_filters--conditions").val( 0 ).trigger( "change" ) ;
+                                    __page_request_values["f4"] = 0 ;                                    
+                                    // Update highlight and label
+                                    var highlight_image = "/examples/MDVIP-1.0.1/images/bodyregion_highlights/" + $("#predesigned_filters--bodyregion-mobile").find( ":selected" ).data( "highlight" ) ;
+                                    var title_label = $("#predesigned_filters--bodyregion-mobile").find( ":selected" ).data( "title" ) ;
+                                    $(".ptlinked--m_bodyregion_highlight").find( "img" ).attr( "src", highlight_image ) ;
+                                    $(".ptlinked--m_bodyregion_highlight").find( ".highlight-label" ).html( title_label ) ;     
+                                    $(".ptlinked--m_bodyregion_highlight").show( ) ;
+                                }
+                                filter_breadcrumb( oid, title, type, 'add' ) ;                                                                         
                                 current_index = 0 ;                                
                                 requestPrograms( ) ;                                                            
+                                // Auto Close Mobile filter panel
                                 if( $(".mobile-filter-panel").hasClass( "opened" ) ) {
                                     $(".mobile-filter-panel").removeClass( "opened" ) ;
                                 }                                
+                                // Display or hide clear all filters link
                                 var clear = mbodyregion.parent( ).parent().find( ".mobile-filter--clear" ) ;
                                 if( oid == 0 ) {
                                     if( clear.hasClass( "active" ) ) { clear.removeClass( "active" ) ; }            
+                                    // Reset Body Highlight
+                                    var highlight_image = "/examples/MDVIP-1.0.1/images/bodyregion_highlights/bodyregion--empty.png" ;
+                                    var title_label = "All Programs" ;
+                                    $(".ptlinked--m_bodyregion_highlight").find( "img" ).attr( "src", highlight_image ) ;
+                                    $(".ptlinked--m_bodyregion_highlight").find( ".highlight-label" ).html( title_label ) ;     
+                                    $(".ptlinked--m_bodyregion_highlight").show( ) ;   
                                 } else {                                
                                     if( !clear.hasClass( "active" ) ) { clear.addClass( "active" ) ; }
                                 }
@@ -210,36 +234,62 @@
                 selected_item.addClass( "active-filter" ) ;
             }            
             initCategoryScrollMechanics( ) ; // Initialize the Scroll Mechanics
+            // Add Timing code HERE
+            //$("ul.category-bubbles-list li").unbind( "mouseover" ).on( "mouseover", calc_dropdown_position );
+            $("ul.category-bubbles-list li").unbind( "hover" ).hover( function(event){
+                event.stopPropagation( ) ;
+                var $this = $(this) ;
+                __filter_timer = setTimeout( function(){
+                    calc_dropdown_position( $this ) ;
+                }, __filter_delay ) ;
+            }, function(){
+                clearTimeout( __filter_timer ) ;
+                //$(".ptlinked--filter_dropdown").removeClass( "display show" ) ;
+            });
+
+
             $("ul.category-bubbles-list li").unbind( "click" ).on( "click", function(){
                 var oid = $(this).data( "oid" ) ;                
                 var custom_cat = $(this).data( "customcat" ) ;
+                var title = $(this).data( "title" ) ;
+                var type = $(this).data( "type" ) ;
                 var cur_c = __page_request_values["c"] ;
                 var cur_c1 = __page_request_values["c1"] ;
-                var cur_f1 = __page_request_values["f1"] ;
-                var cur_f2 = __page_request_values["f2"] ;
-                var cur_f3 = __page_request_values["f3"] ;
-                var cur_f4 = __page_request_values["f4"] ;                            
-                var cur_f5 = __page_request_values["f5"] ;                            
+                var cur_f1 = __page_request_values["f1"] ;                
+                var cur_f4 = __page_request_values["f4"] ;                                            
             	if( cur_c != oid || cur_c1 != custom_cat ) {
-            		setPageRequestValue( "c", oid ) ;    
-                    setPageRequestValue( "c1", custom_cat ) ;    
+            		setPageRequestValue( "c", oid ) ;
+                    setPageRequestValue( "c1", custom_cat ) ;
                     if( custom_cat > 0 ) {
-                        if( cur_f1 > 0 ) { setPageRequestValue( "f1", 0 ) ; }
-                        if( cur_f2 > 0 ) { setPageRequestValue( "f2", 0 ) ; }
-                        if( cur_f3 > 0 ) { setPageRequestValue( "f3", 0 ) ; }
-                        if( cur_f4 > 0 ) { setPageRequestValue( "f4", 0 ) ; }
-                        if( cur_f5 > 0 ) { setPageRequestValue( "f5", 0 ) ; }                        
+                        filter_breadcrumb( __page_request_values["f4"], "", "condition", 'remove' ) ;                        
+                        filter_breadcrumb( __page_request_values["f1"], "", "type", 'remove' ) ;
+                        if( cur_f1 > 0 ) { setPageRequestValue( "f1", 0 ) ; }                        
+                        if( cur_f4 > 0 ) { setPageRequestValue( "f4", 0 ) ; }                        
                         $("#predesigned_filters--conditions").val( 0 ).trigger( "change" ) ;
-                        $("#predesigned_filters--equipment").val( 0 ).trigger( "change" ) ;
-                        $("#predesigned_filters--types li").removeClass( "selected" ) ;
-                        $("#predesigned_filters--difficulty li").removeClass( "selected" ) ;
-                        $("#predesigned_filters--duration li").removeClass( "selected" ) ;
+                        __page_request_values["f4"] = 0 ;                                                                    
+                        $("#predesigned_filters--types li").removeClass( "selected" ) ;                        
                     } else {
-                		if( cur_f4 > 0 ) { setPageRequestValue( "f4", 0 ) ; }
-                		if( cur_f1 > 0 ) { setPageRequestValue( "f1", 0 ) ; }
-                		$("#predesigned_filters--conditions").val( 0 ).trigger( "change" ) ;
-                        $("#predesigned_filters--types li").removeClass( "selected" ) ;
+                        filter_breadcrumb( __page_request_values["f4"], "", "condition", 'remove' ) ;
+                		if( cur_f4 > 0 ) { setPageRequestValue( "f4", 0 ) ; }                		                	
+                        // Check to see if the type is available for the body region selection. If so, then keep it set. If not, then clear it and remove the breadcrumb bubble.
+                        var __item_found = false ;
+                        __bodyregion_info[oid]["types"].forEach( function(item, index, arr){
+                            if( item["type_id"] == cur_f1 ) {
+                                __item_found = true ;
+                            }
+                        });
+                        if( !__item_found ){ 
+                            // Remove BreadCrumb
+                            filter_breadcrumb( __page_request_values["f1"], "", "type", 'remove' ) ;
+                            if( cur_f1 > 0 ) { setPageRequestValue( "f1", 0 ) ; }
+                            $("#predesigned_filters--types li").removeClass( "selected" ) ;                            
+                            // Select View All element in the type list
+                            $("ul.filter--item_list li[data-oid='0']").addClass( "selected" ) ;
+                        }                        
+                        $("#predesigned_filters--conditions").val( 0 ).trigger( "change" ) ;
+                        __page_request_values["f4"] = 0 ;                        
                     }
+                    filter_breadcrumb( oid, title, type, 'add' ) ;
                     current_index = 0 ;
                     requestPrograms( ) ;
                     $("ul.category-bubbles-list li").removeClass( "active-filter" ) ;
@@ -271,6 +321,8 @@
 
             $(rightScrollArrow).click(function() {
                 event.preventDefault();
+                // if filter drop down is visible, hide it
+                $(".ptlinked--filter_dropdown").removeClass( "show" ).delay( 500 ).removeClass( "display" ) ;
                 scrollContainer.animate({
                     scrollLeft: "+="+scrollIncrement+"px"
                 }, "slow", function(){
@@ -293,6 +345,8 @@
 
             $(leftScrollArrow).click(function() {
                 event.preventDefault();
+                // if filter drop down is visible, hide it
+                $(".ptlinked--filter_dropdown").removeClass( "show" ).delay( 500 ).removeClass( "display" ) ;
                 scrollContainer.animate({
                     scrollLeft: "-="+( scrollIncrement + farRightOffset )+"px"
                 }, "slow", function(){
@@ -340,22 +394,12 @@
             if( $(".mobile-filter-panel").css( "display" ) != "none" ) {
                 _is_mobile = true ;
             }
-
             if( ( typeof __page_request_values["f1"] !== 'undefined' ) && __page_request_values["f1"] > 0 ) {
                 require_clear_all = true ;
-            }
-            if( ( typeof __page_request_values["f2"] !== 'undefined' ) && __page_request_values["f2"] > 0 ) {
-                require_clear_all = true ;
-            }
-            if( ( typeof __page_request_values["f3"] !== 'undefined' ) && __page_request_values["f3"] > 0 ) {
-                require_clear_all = true ;
-            }
+            }            
             if( ( typeof __page_request_values["f4"] !== 'undefined' ) && __page_request_values["f4"] > 0 ) {
                 require_clear_all = true ;
-            }
-            if( ( typeof __page_request_values["f5"] !== 'undefined' ) && __page_request_values["f5"] > 0 ) {
-                require_clear_all = true ;
-            }    
+            }            
             if( ( typeof __page_request_values["c1"] !== 'undefined' ) && __page_request_values["c1"] > 1 ) {         
                     require_clear_all = true ;      
             }        
@@ -399,9 +443,7 @@
 
         // 2.3 Clear the Filter DOM Containers
         function clearFilters( ) {
-            $("#predesigned_filters--types").html( "" ) ;
-            $("#predesigned_filters--difficulty").html( "" ) ;
-            $("#predesigned_filters--duration").html( "" ) ;
+            $("#predesigned_filters--types").html( "" ) ;            
         }
 
         // 2.4 Clear all Selected Filters
@@ -415,12 +457,18 @@
             } else {
                 __page_request_values["c1"] = 0 ;
             }            
-            __page_request_values["f1"] = 0 ;
-            __page_request_values["f2"] = 0 ;
-            __page_request_values["f3"] = 0 ;
-            __page_request_values["f4"] = 0 ;
-            __page_request_values["f5"] = 0 ;
+            __page_request_values["f1"] = 0 ;            
+            __page_request_values["f4"] = 0 ;            
             current_index = 0 ;            
+            selected_filters =  {
+                                    bodyregion: {},
+                                    type: {},                                    
+                                    condition: {}
+                                };
+            var _p = $(".predesigned--filter_crumbtrail") ;
+            var _p_m = $(".mobile-predesigned--filter_crumbtrail") ;
+            _p.html( "" ) ; 
+            _p_m.html( "" ) ;
             setFilters( ) ;
             requestPrograms( ) ;
         }
@@ -450,15 +498,12 @@
 			__page_request_values["c"] = 0 ;	// Selected Category
             __page_request_values["c1"] = 0 ;   // Is custom category 
 			__page_request_values["v"] = "" ;	// Search String
-			__page_request_values["f1"] = 0 ;	// Type Filter
-			__page_request_values["f2"] = 0 ;	// Difficulty Filter
-			__page_request_values["f3"] = 0 ;	// Duration Filter
-			__page_request_values["f4"] = 0 ;	// Condition Filter
-			__page_request_values["f5"] = 0 ;	// Equipment Filter	
+			__page_request_values["f1"] = 0 ;	// Type Filter			
+			__page_request_values["f4"] = 0 ;	// Condition Filter			            
 			//Cookies.remove('ptlinkedQueryState');
 			Cookies.remove('ptlinkedQueryState', { path: '/', domain: '.ptlinked.com', secure: true } ) ;
-			predesigned_controller.set_filters( ) ;
-			predesigned_controller.route_query( ) ;	
+			setFilters( ) ;
+			routeQuery( ) ;	
         }
 
         // 2.6 Clear Filter Click Handler
@@ -504,7 +549,7 @@
         function loadFilters( ) {            
             var url = options["api_root_url"] + "/predesigned/filters/html" ; 
             var s = getBootstrapDeviceSize( );
-            if( s == "xs" || s == "sm" || s == "md" ) {
+            if( s == "xs" || s == "sm" || s == "md" || s == "lg" ) {
                 url = options["api_root_url"] + "/predesigned/filters/html2" ; 
             }
             $.ajax({
@@ -531,26 +576,76 @@
             });
         }
 
+        // 2.7b Load the Filters
+        function loadFilterLookups( ) {            
+            var url = options["api_root_url"] + "/predesigned/bodyregions/lookup" ;         
+            $.ajax({
+                type: "GET",
+                crossDomain: true,
+                headers: { 'token-authorization-x': options["api_key"], 'ptlinked-uid-x': options["user_uid"], 'ptlinked-utype-x': options["user_type"] }, 
+                url: url,                
+                dataType: "json",
+                error: function( jqXHR, textStatus, errorThrown ) {
+                    if( options["debug_mode"] ) {
+                        console.log( "::::: Load Filters AJAX :::::" ) ;
+                        console.log( "Request Error or Timeout" ) ;               
+                        console.log( "Status Code: " + jqXHR["status"] ) ;
+                        console.log( "Status Msg: " + jqXHR["statusText"] ) ;             
+                        console.log( "Response Msg: " + jqXHR["responseText"] ) ;
+                        console.log( "::::: ===== ===== ===== ===== :::::" ) ;
+                    }
+                    __error_detected = true ;
+                    toggle_info_box( "predesigned--sys_error", "FIL" + jqXHR["status"] + " - " + jqXHR["statusText"] ) ;
+                },
+                success: function( data, textStatus, jqXHR ) {     
+                    __bodyregion_info = data ;
+                }        
+            });
+        }
+
         // 2.8 Render the Filter Components
         function renderFilters( html ) {
             // Types
-            var types = $("#predesigned_filters--types") ;                    
+            var types = $("ul.filter--item_list") ;                    
             var mtypes = $("#predesigned_filters--types-mobile") ;
             var $grid_filter = $("#grid-filter") ;
             var $mobile_filter_menu = $(".mobile-filter-panel") ;
-            types.html( "" ) ;
-            mtypes.html( "<option selected value='0'>Filter by type...</option>" ) ;
+            types.html( '<li data-oid="0" data-filter_label="View All" data-filter_type="type" class="selected"><span><i class="fas fa-angle-right mr-3 selection-hover"></i>View All</span></li>' ) ;
+            mtypes.html( "<option selected value='0'>Type</option>" ) ;
             $.each( html["types"], function( index, value ) {
                 types.append( value ) ;
                 mtypes.append( value ) ;
             });
-            var $types_li = $("#predesigned_filters--types li") ;
+            var $types_li = $("ul.filter--item_list li") ;
             mtypes.select2( ) ; // Mobile Filter Drop Down            
             $types_li.unbind( "click" ).on( "click", function(){
-                var oid = $(this).data( "oid" ) ;                
+                var oid = $(this).data( "oid" ) ;      
+                var title = $(this).data( "filter_label" ) ;
+                var type = $(this).data( "filter_type" ) ;          
+                var bodyregion_id = $("#selected_bodyregion_id").val( ) ;                
+                var bodyregion_title = __bodyregion_info[bodyregion_id]["title"] ;                
+                filter_breadcrumb( __page_request_values["c"], "", "bodyregion", 'remove' ) ;
+                $("ul.category-bubbles-list li").removeClass( "active-filter" ) ;
+                filter_breadcrumb( bodyregion_id, bodyregion_title, "bodyregion", 'add' ) ;                                                
+                $("ul.category-bubbles-list li[data-oid='"+bodyregion_id+"'][data-customcat='0']").addClass( "active-filter" ) ;
+                __page_request_values["c"] = bodyregion_id ;
+                if( __page_request_values["c1"] > 0 ) {
+                    __page_request_values["c1"] = 0 ;
+                }
                 if( typeof __page_request_values["f1"] !== "undefined" ) {
-                    if( __page_request_values["f1"] != oid ) {
-                        __page_request_values["f1"] = oid ;             
+                    if( __page_request_values["f1"] != oid ) {            
+                        if( __page_request_values["f1"] == 1 ) {
+                            filter_breadcrumb( __page_request_values["f4"], "", "condition", 'remove' ) ;
+                            $("#predesigned_filters--conditions").val( 0 ).trigger( "change" ) ;
+                            __page_request_values["f4"] = 0 ;
+                        }            
+                        if( oid == 0 ) {
+                            filter_breadcrumb( __page_request_values["f1"], "", "type", 'remove' ) ;
+                        } else {
+                            filter_breadcrumb( oid, title, type, 'add' ) ;      
+                        }
+                        __page_request_values["f1"] = oid ;       
+
                         $types_li.removeClass( "selected" ) ;
                         $(this).addClass( "selected" ) ;
                         if( $grid_filter.hasClass( "open" ) ) {
@@ -560,11 +655,18 @@
                         requestPrograms( ) ;
                     } else {                
                         if( __page_request_values["f1"] == 1 ) {
+                            filter_breadcrumb( __page_request_values["f4"], "", "condition", 'remove' ) ;
                             $("#predesigned_filters--conditions").val( 0 ).trigger( "change" ) ;
-                            __page_request_values["f4"] = 0 ;                   
+                            __page_request_values["f4"] = 0 ;
                         }
-                        __page_request_values["f1"] = 0 ;                               
-                        $types_li.removeClass( "selected" ) ;             
+                        if( oid == 0 ) {
+                            filter_breadcrumb( __page_request_values["f1"], "", "type", 'remove' ) ;
+                        } else {
+                            filter_breadcrumb( oid, title, type, 'remove' ) ;      
+                        }
+                        __page_request_values["f1"] = 0 ;                           
+                        $types_li.removeClass( "selected" ) ;  
+                        $("ul.filter--item_list li[data-oid='0']").addClass( "selected" ) ;             
                         if( $grid_filter.hasClass( "open" ) ) {
                             $grid_filter.removeClass( "open" ) ;
                         }
@@ -572,7 +674,12 @@
                         requestPrograms( ) ;
                     }
                 } else {
-                    __page_request_values["f1"] = oid ;         
+                    if( oid == 0 ) {
+                        filter_breadcrumb( __page_request_values["f1"], "", "type", 'remove' ) ;
+                    } else {
+                        filter_breadcrumb( oid, title, type, 'add' ) ;   
+                    }
+                    __page_request_values["f1"] = oid ;                          
                     $types_li.removeClass( "selected" ) ;
                     $(this).addClass( "selected" ) ;
                     if( $grid_filter.hasClass( "open" ) ) {
@@ -584,9 +691,26 @@
             });
 
             mtypes.unbind( "select2:select" ).on('select2:select', function(e){
-                var oid = $("#predesigned_filters--types-mobile").val( ) ;                                          
+                var oid = $("#predesigned_filters--types-mobile").val( ) ;
+                var title = $("#predesigned_filters--types-mobile").find( ":selected" ).data( "filter_label" ) ;
+                var type = $("#predesigned_filters--types-mobile").find( ":selected" ).data( "filter_type" ) ;
+                var bodyregion_id = $("#predesigned_filters--bodyregion-mobile").val( ) ;
+                var bodyregion_title = __bodyregion_info[bodyregion_id]["title"] ;
+                //filter_breadcrumb( __page_request_values["c"], "", "bodyregion", 'remove' ) ;
+                //filter_breadcrumb( bodyregion_id, bodyregion_title, "bodyregion", 'add' ) ;
+
                 if( typeof __page_request_values["f1"] !== "undefined" ) {
                     if( __page_request_values["f1"] != oid ) {
+                        if( __page_request_values["f1"] == 1 ) {     
+                            filter_breadcrumb( __page_request_values["f4"], "", "condition", 'remove' ) ;                                    
+                            $("#predesigned_filters--conditions-mobile").val( 0 ).trigger( "change" ) ;
+                            __page_request_values["f4"] = 0 ;                                           
+                        }
+                        if( oid == 0 ) {
+                            filter_breadcrumb( __page_request_values["f1"], "", "type", 'remove' ) ;
+                        } else {
+                            filter_breadcrumb( oid, title, type, 'add' ) ;      
+                        }
                         __page_request_values["f1"] = oid ;                             
                         current_index = 0 ;
                         requestPrograms( ) ;
@@ -602,9 +726,15 @@
                             if( !clear.hasClass( "active" ) ) { clear.addClass( "active" ) ; }
                         }               
                     } else {                
-                        if( __page_request_values["f1"] == 1 ) {                                                        
+                        if( __page_request_values["f1"] == 1 ) {                      
+                            filter_breadcrumb( __page_request_values["f4"], "", "condition", 'remove' ) ;                                  
                             $("#predesigned_filters--conditions-mobile").val( 0 ).trigger( "change" ) ;
                             __page_request_values["f4"] = 0 ;                                           
+                        }
+                        if( oid == 0 ) {
+                            filter_breadcrumb( __page_request_values["f1"], "", "type", 'remove' ) ;
+                        } else {
+                            filter_breadcrumb( oid, title, type, 'remove' ) ;      
                         }
                         __page_request_values["f1"] = 0 ;                                               
                         current_index = 0 ;
@@ -622,6 +752,11 @@
                         }
                     }
                 } else {
+                    if( oid == 0 ) {
+                        filter_breadcrumb( __page_request_values["f1"], "", "type", 'remove' ) ;
+                    } else {
+                        filter_breadcrumb( oid, title, type, 'add' ) ;   
+                    }
                     __page_request_values["f1"] = oid ;                     
                     current_index = 0 ;
                     requestPrograms( ) ;
@@ -638,293 +773,7 @@
                     }
                     
                 }               
-            });
-
-            // Difficulty
-            var difficulty = $("#predesigned_filters--difficulty") ;
-            var mdifficulty = $("#predesigned_filters--difficulty-mobile") ;                        
-            difficulty.html( "" ) ;
-            mdifficulty.html( "<option selected value='0'>Filter by difficulty...</option>" ) ;
-            $.each( html["difficulty"], function( index, value ) {
-                difficulty.append( value ) ;
-                mdifficulty.append( value ) ;
-            });
-            var $difficulty_li = $("#predesigned_filters--difficulty li") ;
-            mdifficulty.select2( ) ;
-            $difficulty_li.unbind( "click" ).on( "click", function(){
-                var oid = $(this).data( "oid" ) ;
-                if( typeof __page_request_values["f2"] !== "undefined" ) {
-                    if( __page_request_values["f2"] != oid ) {
-                        __page_request_values["f2"] = oid ;             
-                        $difficulty_li.removeClass( "selected" ) ;
-                        $(this).addClass( "selected" ) ;
-                        if( $grid_filter.hasClass( "open" ) ) {
-                            $grid_filter.removeClass( "open" ) ;
-                        }
-                        current_index = 0 ;
-                        requestPrograms( ) ;
-                    }  else {
-                        __page_request_values["f2"] = 0 ;               
-                        $difficulty_li.removeClass( "selected" ) ;                
-                        if( $grid_filter.hasClass( "open" ) ) {
-                            $grid_filter.removeClass( "open" ) ;
-                        }
-                        current_index = 0 ;
-                        requestPrograms( ) ;
-                    }
-                } else {
-                    __page_request_values["f2"] = oid ;         
-                    $difficulty_li.removeClass( "selected" ) ;
-                    $(this).addClass( "selected" ) ;
-                    if( $grid_filter.hasClass( "open" ) ) {
-                        $grid_filter.removeClass( "open" ) ;
-                    }
-                    current_index = 0 ;
-                    requestPrograms( ) ;
-                }           
-            });
-
-            mdifficulty.unbind( "select2:select" ).on('select2:select', function(e){
-                var oid = $("#predesigned_filters--difficulty-mobile").val( ) ;     
-                if( typeof __page_request_values["f2"] !== "undefined" ) {
-                    if( __page_request_values["f2"] != oid ) {
-                        __page_request_values["f2"] = oid ;                             
-                        current_index = 0 ;
-                        requestPrograms( ) ;
-                        // Close Filter Menu
-                        if( $mobile_filter_menu.hasClass( "opened" ) ) {
-                            $mobile_filter_menu.removeClass( "opened" ) ;
-                        }
-                        // Clear button
-                        var clear = mdifficulty.parent( ).parent().find( ".mobile-filter--clear" ) ;
-                        if( oid == 0 ) {
-                            if( clear.hasClass( "active" ) ) { clear.removeClass( "active" ) ; }            
-                        } else {                                
-                            if( !clear.hasClass( "active" ) ) { clear.addClass( "active" ) ; }
-                        }               
-                    } else {                                
-                        __page_request_values["f2"] = 0 ;                                               
-                        current_index = 0 ;
-                        requestPrograms( ) ;
-                        // Close Filter Menu
-                        if( $mobile_filter_menu.hasClass( "opened" ) ) {
-                            $mobile_filter_menu.removeClass( "opened" ) ;
-                        }
-                        // Clear button
-                        var clear = mdifficulty.parent( ).parent().find( ".mobile-filter--clear" ) ;
-                        if( oid == 0 ) {
-                            if( clear.hasClass( "active" ) ) { clear.removeClass( "active" ) ; }            
-                        } else {                                
-                            if( !clear.hasClass( "active" ) ) { clear.addClass( "active" ) ; }
-                        }               
-                    }
-                } else {
-                    __page_request_values["f2"] = oid ;                     
-                    current_index = 0 ;
-                    requestPrograms( ) ;
-                    // Close Filter Menu
-                    if( $mobile_filter_menu.hasClass( "opened" ) ) {
-                        $mobile_filter_menu.removeClass( "opened" ) ;
-                    }
-                    // Clear button
-                    var clear = mdifficulty.parent( ).parent().find( ".mobile-filter--clear" ) ;
-                    if( oid == 0 ) {
-                        if( clear.hasClass( "active" ) ) { clear.removeClass( "active" ) ; }            
-                    } else {                                
-                        if( !clear.hasClass( "active" ) ) { clear.addClass( "active" ) ; }
-                    }
-                }               
-            });
-
-            // Duration
-            var duration = $("#predesigned_filters--duration") ;
-            var mduration = $("#predesigned_filters--duration-mobile") ;            
-            duration.html( "" ) ;
-            mduration.html( "<option selected value='0'>Filter by duration...</option>" ) ;
-            $.each( html["duration"], function( index, value ) {
-                duration.append( value ) ;
-                mduration.append( value ) ;
-            });
-            var $duration_li = $("#predesigned_filters--duration li") ;
-            mduration.select2( ) ;
-            $duration_li.unbind( "click" ).on( "click", function(){
-                var oid = $(this).data( "oid" ) ;
-                if( typeof __page_request_values["f3"] !== "undefined" ) {
-                    if( __page_request_values["f3"] != oid ) {
-                        __page_request_values["f3"] = oid ;             
-                        $duration_li.removeClass( "selected" ) ;
-                        $(this).addClass( "selected" ) ;
-                        if( $grid_filter.hasClass( "open" ) ) {
-                            $grid_filter.removeClass( "open" ) ;
-                        }
-                        current_index = 0 ;
-                        requestPrograms( ) ;
-                    }  else {
-                        __page_request_values["f3"] = 0 ;               
-                        $duration_li.removeClass( "selected" ) ;              
-                        if( $grid_filter.hasClass( "open" ) ) {
-                            $grid_filter.removeClass( "open" ) ;
-                        }
-                        current_index = 0 ;
-                        requestPrograms( ) ;
-                    }
-                } else {
-                    __page_request_values["f3"] = oid ;         
-                    $duration_li.removeClass( "selected" ) ;
-                    $(this).addClass( "selected" ) ;
-                    if( $grid_filter.hasClass( "open" ) ) {
-                        $grid_filter.removeClass( "open" ) ;
-                    }
-                    current_index = 0 ;
-                    requestPrograms( ) ;
-                }           
-            });
-
-            mduration.unbind( "select2:select" ).on('select2:select', function(e){
-                var oid = $("#predesigned_filters--duration-mobile").val( ) ;       
-                if( typeof __page_request_values["f3"] !== "undefined" ) {
-                    if( __page_request_values["f3"] != oid ) {
-                        __page_request_values["f3"] = oid ; 
-                        current_index = 0 ;
-                        requestPrograms( ) ;
-                        // Close Filter Menu
-                        if( $mobile_filter_menu.hasClass( "opened" ) ) {
-                            $mobile_filter_menu.removeClass( "opened" ) ;
-                        }
-                        // Clear button
-                        var clear = mduration.parent( ).parent().find( ".mobile-filter--clear" ) ;
-                        if( oid == 0 ) {
-                            if( clear.hasClass( "active" ) ) { clear.removeClass( "active" ) ; }            
-                        } else {                                
-                            if( !clear.hasClass( "active" ) ) { clear.addClass( "active" ) ; }
-                        }               
-                    } else {                                
-                        __page_request_values["f3"] = 0 ;                                               
-                        current_index = 0 ;
-                        requestPrograms( ) ;
-                        // Close Filter Menu
-                        if( $mobile_filter_menu.hasClass( "opened" ) ) {
-                            $mobile_filter_menu.removeClass( "opened" ) ;
-                        }
-                        // Clear button
-                        var clear = mduration.parent( ).parent().find( ".mobile-filter--clear" ) ;
-                        if( oid == 0 ) {
-                            if( clear.hasClass( "active" ) ) { clear.removeClass( "active" ) ; }            
-                        } else {                                
-                            if( !clear.hasClass( "active" ) ) { clear.addClass( "active" ) ; }
-                        }               
-                    }
-                } else {
-                    __page_request_values["f3"] = oid ;                     
-                    current_index = 0 ;
-                    requestPrograms( ) ;
-                    // Close Filter Menu
-                    if( $mobile_filter_menu.hasClass( "opened" ) ) {
-                        $mobile_filter_menu.removeClass( "opened" ) ;
-                    }
-                    // Clear button
-                    var clear = mduration.parent( ).parent().find( ".mobile-filter--clear" ) ;
-                    if( oid == 0 ) {
-                        if( clear.hasClass( "active" ) ) { clear.removeClass( "active" ) ; }            
-                    } else {                                
-                        if( !clear.hasClass( "active" ) ) { clear.addClass( "active" ) ; }
-                    }
-                }               
-            });
-
-            // Equipment
-            var equipment = $("#predesigned_filters--equipment") ;
-            var mequipment = $("#predesigned_filters--equipment-mobile") ;
-            equipment.html( "<option selected value='0'>Filter by equipment...</option>" ) ;
-            mequipment.html( "<option selected value='0'>Filter by equipment...</option>" ) ;
-            $.each( html["equipment"], function( index, value ) {
-                equipment.append( value ) ;
-                mequipment.append( value ) ;
-            }); 
-            equipment.select2( ) ;
-            mequipment.select2( ) ;
-            equipment.unbind( "select2:select" ).on('select2:select', function(e){
-                var oid = $("#predesigned_filters--equipment").val( ) ;
-                if( typeof __page_request_values["f5"] !== "undefined" ) {
-                    if( __page_request_values["f5"] != oid ) {
-                        __page_request_values["f5"] = oid ;
-                        current_index = 0 ;
-                        requestPrograms( ) ;
-                        // Make sure TYPE=Condition Specific
-                        if( $grid_filter.hasClass( "open" ) ) {
-                            $grid_filter.removeClass( "open" ) ;
-                        }
-                    }  else {
-                        __page_request_values["f5"] = 0 ;
-                        current_index = 0 ;
-                        requestPrograms( ) ;
-                        // Make sure TYPE=Condition Specific
-                        if( $grid_filter.hasClass( "open" ) ) {
-                            $grid_filter.removeClass( "open" ) ;
-                        }
-                    }
-                } else {
-                    __page_request_values["f5"] = oid ;
-                    current_index = 0 ;
-                    requestPrograms( ) ;
-                    // Make sure TYPE=Condition Specific            
-                    if( $grid_filter.hasClass( "open" ) ) {
-                        $grid_filter.removeClass( "open" ) ;
-                    }
-                }   
-            });
-
-            mequipment.unbind( "select2:select" ).on('select2:select', function(e){
-                var oid = $("#predesigned_filters--equipment-mobile").val( ) ;      
-                if( typeof __page_request_values["f5"] !== "undefined" ) {
-                    if( __page_request_values["f5"] != oid ) {
-                        __page_request_values["f5"] = oid ;                     
-                        current_index = 0 ;  
-                        requestPrograms( ) ;
-                        // Close Filter Menu
-                        if( $mobile_filter_menu.hasClass( "opened" ) ) {
-                            $mobile_filter_menu.removeClass( "opened" ) ;
-                        }
-                        // Clear button
-                        var clear = mequipment.parent( ).parent().find( ".mobile-filter--clear" ) ;
-                        if( oid == 0 ) {
-                            if( clear.hasClass( "active" ) ) { clear.removeClass( "active" ) ; }            
-                        } else {                                
-                            if( !clear.hasClass( "active" ) ) { clear.addClass( "active" ) ; }
-                        }
-                    } else {                                
-                        __page_request_values["f5"] = 0 ;                           
-                        current_index = 0 ;
-                        requestPrograms( ) ;
-                        // Close Filter Menu
-                        if( $mobile_filter_menu.hasClass( "opened" ) ) {
-                            $mobile_filter_menu.removeClass( "opened" ) ;
-                        }
-                        // Clear button
-                        var clear = mequipment.parent( ).parent().find( ".mobile-filter--clear" ) ;
-                        if( oid == 0 ) {
-                            if( clear.hasClass( "active" ) ) { clear.removeClass( "active" ) ; }            
-                        } else {                                
-                            if( !clear.hasClass( "active" ) ) { clear.addClass( "active" ) ; }
-                        }
-                    }
-                } else {
-                    __page_request_values["f5"] = oid ; 
-                    current_index = 0 ;                  
-                    requestPrograms( ) ;
-                    // Close Filter Menu
-                    if( $mobile_filter_menu.hasClass( "opened" ) ) {
-                        $mobile_filter_menu.removeClass( "opened" ) ;
-                    }
-                    // Clear button
-                    var clear = mequipment.parent( ).parent().find( ".mobile-filter--clear" ) ;
-                    if( oid == 0 ) {
-                        if( clear.hasClass( "active" ) ) { clear.removeClass( "active" ) ; }            
-                    } else {                                
-                        if( !clear.hasClass( "active" ) ) { clear.addClass( "active" ) ; }
-                    }
-                }               
-            });
+            });            
 
             // Initialize the click handler for the Clear Icons
             $(".mobile-filter--clear").unbind( "click" ).on( "click", handleClearFilter ) ;    
@@ -934,27 +783,52 @@
 
         /* 2.9 Refresh the Conditions drop down filter */
         function refreshConditionFilters( conditions_data ) {
-            var conditions = $("#predesigned_filters--conditions") ;
+            var conditions = $("#filter--condition_type") ;
             var mconditions = $("#predesigned_filters--conditions-mobile") ;
             var $grid_filter = $("#grid-filter") ;
-            var $mobile_filter_menu = $(".mobile-filter-panel")
-            conditions.html( "<option selected value='0'>Filter by condition...</option>" ) ;
-            mconditions.html( "<option selected value='0'>Filter by condition...</option>" ) ;
+            var $mobile_filter_menu = $(".mobile-filter-panel")                        
+            if( typeof conditions_data == 'undefined' ) { $("#condition-filter").hide( ) ; conditions_data = false; } 
+            else if( !conditions_data ) { $("#condition-filter").hide( ) ; }
+            else { $("#condition-filter").show( ) ; }
+            conditions.html( "<option selected value='0'>Filter by condition</option>" ) ;
+            mconditions.html( "<option selected value='0'>Condition</option>" ) ;
             $.each( conditions_data, function( index, value ) {
                 conditions.append( value ) ;
                 mconditions.append( value ) ;
             }); 
+            if( conditions_data.length < 1 || conditions_data == false ) {                
+                $("#predesigned_filters--conditions-mobile").prop( "disabled", true ) ;                
+            } else {                
+                $("#predesigned_filters--conditions-mobile").prop( "disabled", false ) ;                
+            }
             conditions.select2( ) ;
             mconditions.select2( ) ;
             conditions.unbind( "select2:select" ).on('select2:select', function(e){
-                var oid = $("#predesigned_filters--conditions").val( ) ;        
+                var oid = $("#filter--condition_type").val( ) ;        
+                var title = $("#filter--condition_type").select2().find(":selected").data("title") ;
+                var type = $("#filter--condition_type").select2().find(":selected").data("type") ; 
+                var bodyregion_id = $("#selected_bodyregion_id").val( ) ;
+                var bodyregion_title = $(".highlight-label").html( ) ;
+                // Auto-select body region bubble
+                filter_breadcrumb( __page_request_values["c"], "", "bodyregion", 'remove' ) ;
+                $("ul.category-bubbles-list li").removeClass( "active-filter" ) ;
+                filter_breadcrumb( bodyregion_id, bodyregion_title, "bodyregion", 'add' ) ;                                                
+                $("ul.category-bubbles-list li[data-oid='"+bodyregion_id+"'][data-customcat='0']").addClass( "active-filter" ) ;
+                __page_request_values["c"] = bodyregion_id ;
+
                 if( typeof __page_request_values["f4"] !== "undefined" ) {
-                    if( __page_request_values["f4"] != oid ) {                        
-                        __page_request_values["f4"] = oid ;             
+                    if( __page_request_values["f4"] != oid ) {         
+                        if( $(".clear-condition-filters").hasClass( "hide" ) ) {
+                            $(".clear-condition-filters").removeClass( "hide" ) ;
+                        }
+                        __page_request_values["f4"] = oid ;
+                        filter_breadcrumb( oid, title, type, 'add' ) ; 
                         // Make sure TYPE=Condition Specific
-                        $("#predesigned_filters--types li").removeClass( "selected" ) ;
-                        $("#predesigned_filters--types").find( "li[data-oid=1]" ).addClass( "selected" ) ;
-                        __page_request_values["f1"] = 1 ;               
+                        $("ul.filter--item_list li").removeClass( "selected" ) ;
+                        $("ul.filter--item_list").find( "li[data-oid=1]" ).addClass( "selected" ) ;
+                        filter_breadcrumb( __page_request_values["f1"], "", "type", 'remove' ) ;
+                        __page_request_values["f1"] = 1 ;
+                        //filter_breadcrumb( 1, "Condition Specific", "type", 'add' ) ;
                         if( $grid_filter.hasClass( "open" ) ) {
                             $grid_filter.removeClass( "open" ) ;
                         }
@@ -963,10 +837,11 @@
                     }  else {                        
                         //__page_request_values["f4"] = 0 ;             
                         // Make sure TYPE=Condition Specific
-                        $("#predesigned_filters--types li").removeClass( "selected" ) ;
+                        $("ul.filter--item_list li").removeClass( "selected" ) ;
                         if( __page_request_values["f4"] > 0 ) {
-                            $("#predesigned_filters--types").find( "li[data-oid=1]" ).addClass( "selected" ) ;
+                            $("ul.filter--item_list").find( "li[data-oid=1]" ).addClass( "selected" ) ;
                             __page_request_values["f1"] = 1 ;
+                            //filter_breadcrumb( 1, "Condition Specific", "type", 'add' ) ;
                         }
                         if( $grid_filter.hasClass( "open" ) ) {
                             $grid_filter.removeClass( "open" ) ;
@@ -975,11 +850,16 @@
                         requestPrograms( ) ;
                     }
                 } else {                    
-                    __page_request_values["f4"] = oid ;         
+                    __page_request_values["f4"] = oid ;        
+                    if( $(".clear-condition-filters").hasClass( "hide" ) ) {
+                        $(".clear-condition-filters").removeClass( "hide" ) ;
+                    }
+                    filter_breadcrumb( oid, title, type, 'add' ) ;   
                     // Make sure TYPE=Condition Specific            
-                    $("#predesigned_filters--types li").removeClass( "selected" ) ;
-                    $("#predesigned_filters--types").find( "li[data-oid=1]" ).addClass( "selected" ) ;
+                    $("ul.filter--item_list li").removeClass( "selected" ) ;
+                    $("ul.filter--item_list").find( "li[data-oid=1]" ).addClass( "selected" ) ;
                     __page_request_values["f1"] = 1 ;
+                    //filter_breadcrumb( 1, "Condition Specific", "type", 'add' ) ;
                     if( $grid_filter.hasClass( "open" ) ) {
                         $grid_filter.removeClass( "open" ) ;
                     }
@@ -989,12 +869,23 @@
             });
 
             mconditions.unbind( "select2:select" ).on('select2:select', function(e){
-                var oid = $("#predesigned_filters--conditions-mobile").val( ) ;                     
+                var oid = $("#predesigned_filters--conditions-mobile").val( ) ;     
+                var title = $("#predesigned_filters--conditions-mobile").select2().find(":selected").data("title") ;
+                var type = $("#predesigned_filters--conditions-mobile").select2().find(":selected").data("type") ; 
+                var bodyregion_id = $("#predesigned_filters--bodyregion-mobile").val( ) ;
+                var bodyregion_title = __bodyregion_info[bodyregion_id]["title"] ;
+
                 if( typeof __page_request_values["f4"] !== "undefined" ) {
-                    if( __page_request_values["f4"] != oid ) {
-                        __page_request_values["f4"] = oid ;                             
+                    if( __page_request_values["f4"] != oid ) {                                                                        
+                        if( oid == 0 ) {                            
+                            filter_breadcrumb( __page_request_values["f4"], "", "condition", 'remove' ) ;
+                        } else {
+                            filter_breadcrumb( oid, title, type, 'add' ) ;
+                        }                    
+                        __page_request_values["f4"] = oid ;
+                        filter_breadcrumb( __page_request_values["f1"], "", "type", 'remove' ) ;
                         __page_request_values["f1"] = 1 ; // Set Type to Condition Specific                        
-                        $("#predesigned_filters--types-mobile").val( 1 ).trigger( "change" ) ;
+                        $("#predesigned_filters--types-mobile").val( 0 ).trigger( "change" ) ;
                         current_index = 0 ;
                         requestPrograms( ) ;
                         // Close Filter Menu
@@ -1010,11 +901,16 @@
                         }
                         // Types Clear button
                         var clear = $("#predesigned_filters--types-mobile").parent().parent().find( ".mobile-filter--clear" ) ;
-                        if( !clear.hasClass( "active" ) ) { clear.addClass( "active" ) ; }
+                        if( clear.hasClass( "active" ) ) { clear.removeClass( "active" ) ; }
                     } else {                                
+                        if( oid == 0 ) {                            
+                            filter_breadcrumb( __page_request_values["f4"], "", "condition", 'remove' ) ;
+                        } else {
+                            filter_breadcrumb( oid, title, type, 'add' ) ;
+                        }
                         __page_request_values["f4"] = 0 ;           
                         __page_request_values["f1"] = 1 ; // Set Type to Condition Specific                        
-                        $("#predesigned_filters--types-mobile").val( 1 ).trigger( "change" ) ;                                  
+                        $("#predesigned_filters--types-mobile").val( 0 ).trigger( "change" ) ;                                  
                         current_index = 0 ;
                         requestPrograms( ) ;
                         // Close Filter Menu
@@ -1030,12 +926,17 @@
                         }
                         // Types Clear button
                         var clear = $("#predesigned_filters--types-mobile").parent().parent().find( ".mobile-filter--clear" ) ;
-                        if( !clear.hasClass( "active" ) ) { clear.addClass( "active" ) ; }
+                        if( clear.hasClass( "active" ) ) { clear.removeClass( "active" ) ; }
                     }
                 } else {
+                    if( oid == 0 ) {                        
+                        filter_breadcrumb( __page_request_values["f4"], "", "condition", 'remove' ) ;
+                    } else {
+                        filter_breadcrumb( oid, title, type, 'add' ) ;
+                    }
                     __page_request_values["f4"] = oid ;                     
-                    __page_request_values["f1"] = 1 ; // Set Type to Condition Specific
-                    //$("#predesigned_filters--types-mobile").val( 1 ).trigger( "change" ) ;
+                    filter_breadcrumb( oid, title, type, 'add' ) ;   
+                    __page_request_values["f1"] = 1 ; // Set Type to Condition Specific                    
                     current_index = 0 ;
                     requestPrograms( ) ;
                     // Close Filter Menu
@@ -1051,13 +952,30 @@
                     }
                     // Types Clear button
                     var clear = $("#predesigned_filters--types-mobile").parent().parent().find( ".mobile-filter--clear" ) ;
-                    if( !clear.hasClass( "active" ) ) { clear.addClass( "active" ) ; }
+                    if( clear.hasClass( "active" ) ) { clear.removeClass( "active" ) ; }
                 }               
+            });
+
+            $(".clear-condition-filters").unbind( "click" ).on( "click", function(){
+                filter_breadcrumb( __page_request_values["f4"], "", "condition", 'remove' ) ;
+                $("#predesigned_filters--conditions").val( 0 ).trigger( "change" ) ;
+                __page_request_values["f4"] = 0 ;
+                __page_request_values["f1"] = 0 ;
+                $("ul.filter--item_list li").removeClass( "selected" ) ;
+                $("ul.filter--item_list").find( "li[data-oid=0]" ).addClass( "selected" ) ;
+                if( !$(".clear-condition-filters").hasClass( "hide" ) ) {
+                    $(".clear-condition-filters").addClass( "hide" ) ;
+                }
+                if( $grid_filter.hasClass( "open" ) ) {
+                    $grid_filter.removeClass( "open" ) ;
+                }
+                current_index = 0 ;
+                requestPrograms( ) ;
             });
 
             //$("#predesigned_filters--conditions").val( 0 ).trigger( "change" ) ;            
             if( ( typeof __page_request_values["f4"] !== 'undefined' ) && __page_request_values["f4"] > 0 ) {
-                $("#predesigned_filters--conditions").val( __page_request_values["f4"] ).trigger( "change" ) ;          
+                $("#filter--condition_type").val( __page_request_values["f4"] ).trigger( "change" ) ;          
             }
             $("#predesigned_filters--conditions-mobile").val( __page_request_values["f4"] ).trigger( "change" ) ;
             if( __page_request_values["f4"] > 0 ) {
@@ -1077,8 +995,8 @@
             var msubcategories = $("#predesigned_filters--subcategories-mobile") ;
             var $grid_filter = $("#grid-filter") ;
             var $mobile_filter_menu = $(".mobile-filter-panel")
-            subcategories.html( "<option selected value='1'>Filter by sub-category...</option>" ) ;
-            msubcategories.html( "<option selected value='1'>Filter by sub-category...</option>" ) ;
+            subcategories.html( "<option selected value='1'>Filter by sub-category</option>" ) ;
+            msubcategories.html( "<option selected value='1'>Filter by sub-category</option>" ) ;
             $.each( subcategories_data, function( index, value ) {
                 subcategories.append( value ) ;
                 msubcategories.append( value ) ;
@@ -1158,6 +1076,12 @@
                     if( $("#predesigned_filters--bodyregion-mobile").parent().parent().find( ".mobile-filter--clear" ).hasClass( "active" ) ) {
                         $("#predesigned_filters--bodyregion-mobile").parent().parent().find( ".mobile-filter--clear" ).removeClass( "active" ) ;
                     }
+                    // Reset the Body Region Highlight graphic for mobile
+                    var highlight_image = "/examples/MDVIP-1.0.1/images/bodyregion_highlights/bodyregion--empty.png" ;
+                    var title_label = "All Programs" ;
+                    $(".ptlinked--m_bodyregion_highlight").find( "img" ).attr( "src", highlight_image ) ;
+                    $(".ptlinked--m_bodyregion_highlight").find( ".highlight-label" ).html( title_label ) ;     
+                    $(".ptlinked--m_bodyregion_highlight").show( ) ;
                 } 
 
                 // Set the TYPES Filter
@@ -1174,40 +1098,6 @@
                 } else {
                     if( $("#predesigned_filters--types-mobile").parent().parent().find( ".mobile-filter--clear" ).hasClass( "active" ) ) {
                         $("#predesigned_filters--types-mobile").parent().parent().find( ".mobile-filter--clear" ).removeClass( "active" ) ;
-                    }
-                }
-
-                // Set the DIFFICULTY Filter
-                $("#predesigned_filters--difficulty li").removeClass( "selected" ) ;                
-                if( ( typeof __page_request_values["f2"] !== 'undefined' ) && __page_request_values["f2"] > 0 ) {                       
-                    $("#predesigned_filters--difficulty").find( "li[data-oid='"+__page_request_values["f2"]+"']").addClass( "selected" ) ;
-                }
-                
-                $("#predesigned_filters--difficulty-mobile").val( __page_request_values["f2"] ).trigger( "change" ) ;
-                if( __page_request_values["f2"] > 0 ) {
-                    if( !$("#predesigned_filters--difficulty-mobile").parent().parent().find( ".mobile-filter--clear" ).hasClass( "active" ) ) {
-                        $("#predesigned_filters--difficulty-mobile").parent().parent().find( ".mobile-filter--clear" ).addClass( "active" ) ;
-                    }
-                } else {
-                    if( $("#predesigned_filters--difficulty-mobile").parent().parent().find( ".mobile-filter--clear" ).hasClass( "active" ) ) {
-                        $("#predesigned_filters--difficulty-mobile").parent().parent().find( ".mobile-filter--clear" ).removeClass( "active" ) ;
-                    }
-                }
-
-                // Set the DURATION Filter
-                $("#predesigned_filters--duration li").removeClass( "selected" ) ;              
-                if( ( typeof __page_request_values["f3"] !== 'undefined' ) && __page_request_values["f3"] > 0 ) {
-                    $("#predesigned_filters--duration").find( "li[data-oid='"+__page_request_values["f3"]+"']").addClass( "selected" ) ;
-                }
-                
-                $("#predesigned_filters--duration-mobile").val( __page_request_values["f3"] ).trigger( "change" ) ;
-                if( __page_request_values["f3"] > 0 ) {
-                    if( !$("#predesigned_filters--duration-mobile").parent().parent().find( ".mobile-filter--clear" ).hasClass( "active" ) ) {
-                        $("#predesigned_filters--duration-mobile").parent().parent().find( ".mobile-filter--clear" ).addClass( "active" ) ;
-                    }
-                } else {
-                    if( $("#predesigned_filters--duration-mobile").parent().parent().find( ".mobile-filter--clear" ).hasClass( "active" ) ) {
-                        $("#predesigned_filters--duration-mobile").parent().parent().find( ".mobile-filter--clear" ).removeClass( "active" ) ;
                     }
                 }
 
@@ -1243,24 +1133,7 @@
                     if( $("#predesigned_filters--subcategories-mobile").parent().parent().find( ".mobile-filter--clear" ).hasClass( "active" ) ) {
                         $("#predesigned_filters--subcategories-mobile").parent().parent().find( ".mobile-filter--clear" ).removeClass( "active" ) ;
                     }
-                }
-
-                // Set the EQUIPMENT Filter
-                $("#predesigned_filters--equipment").val( 0 ).trigger( "change" ) ;
-                if( ( typeof __page_request_values["f5"] !== 'undefined' ) && __page_request_values["f5"] > 0 ) {
-                    $("#predesigned_filters--equipment").val( __page_request_values["f5"] ).trigger( "change" ) ;           
-                }       
-                
-                $("#predesigned_filters--equipment-mobile").val( __page_request_values["f5"] ).trigger( "change" ) ;
-                if( __page_request_values["f5"] > 0 ) {
-                    if( !$("#predesigned_filters--equipment-mobile").parent().parent().find( ".mobile-filter--clear" ).hasClass( "active" ) ) {
-                        $("#predesigned_filters--equipment-mobile").parent().parent().find( ".mobile-filter--clear" ).addClass( "active" ) ;
-                    }
-                } else {
-                    if( $("#predesigned_filters--equipment-mobile").parent().parent().find( ".mobile-filter--clear" ).hasClass( "active" ) ) {
-                        $("#predesigned_filters--equipment-mobile").parent().parent().find( ".mobile-filter--clear" ).removeClass( "active" ) ;
-                    }
-                }
+                }                
 
             } else {
                 // Set the Body Region / Category bubbles
@@ -1280,23 +1153,7 @@
                 if( $("#predesigned_filters--types-mobile").parent().parent().find( ".mobile-filter--clear" ).hasClass( "active" ) ) {
                     $("#predesigned_filters--types-mobile").parent().parent().find( ".mobile-filter--clear" ).removeClass( "active" ) ;
                 }
-
-                // Set the DIFFICULTY Filter
-                $("#predesigned_filters--difficulty li").removeClass( "active-filter" ) ;       
                 
-                $("#predesigned_filters--difficulty-mobile").val( 0 ).trigger( "change" ) ;
-                if( $("#predesigned_filters--difficulty-mobile").parent().parent().find( ".mobile-filter--clear" ).hasClass( "active" ) ) {
-                    $("#predesigned_filters--difficulty-mobile").parent().parent().find( ".mobile-filter--clear" ).removeClass( "active" ) ;
-                }
-
-                // Set the DURATION Filter
-                $("#predesigned_filters--duration li").removeClass( "active-filter" ) ;                     
-                
-                $("#predesigned_filters--duration-mobile").val( 0 ).trigger( "change" ) ;
-                if( $("#predesigned_filters--duration-mobile").parent().parent().find( ".mobile-filter--clear" ).hasClass( "active" ) ) {
-                    $("#predesigned_filters--duration-mobile").parent().parent().find( ".mobile-filter--clear" ).removeClass( "active" ) ;
-                }
-
                 // Set the CONDITION Filter
                 $("#predesigned_filters--conditions").val( 0 ).trigger( "change" ) ;
                 
@@ -1312,15 +1169,6 @@
                 if( $("#predesigned_filters--subcategories-mobile").parent().parent().find( ".mobile-filter--clear" ).hasClass( "active" ) ) {
                     $("#predesigned_filters--subcategories-mobile").parent().parent().find( ".mobile-filter--clear" ).removeClass( "active" ) ;
                 }
-
-                // Set the EQUIPMENT Filter
-                $("#predesigned_filters--equipment").val( 0 ).trigger( "change" ) ;
-                
-                $("#predesigned_filters--equipment-mobile").val( 0 ).trigger( "change" ) ;
-                if( $("#predesigned_filters--equipment-mobile").parent().parent().find( ".mobile-filter--clear" ).hasClass( "active" ) ) {
-                    $("#predesigned_filters--equipment-mobile").parent().parent().find( ".mobile-filter--clear" ).removeClass( "active" ) ;
-                }
-
             }
         }
 
@@ -1339,24 +1187,10 @@
                 }
                 if( filter_drop_down.find( ".filter--drop_down_conditions-wrapper" ).hasClass( "active" ) ) {
                     filter_drop_down.find( ".filter--drop_down_conditions-wrapper" ).removeClass( "active" ) ;
-                }
-
+                }                        
                 // Mobile
-                if( mfilter_drop_down_list.find( "li.conditions-mobile_dropdown" ).hasClass( "active" ) ) {
-                    mfilter_drop_down_list.find( "li.conditions-mobile_dropdown" ).removeClass( "active" ) ;
-                }
-                if( !mfilter_drop_down_list.find( "li.subcategories-mobile_dropdown" ).hasClass( "active" ) ) {
-                    mfilter_drop_down_list.find( "li.subcategories-mobile_dropdown" ).addClass( "active" ) ;
-                }
-                if( !mfilter_drop_down_list.find( "li.types-mobile_dropdown" ).hasClass( "hide" ) ) {
-                    mfilter_drop_down_list.find( "li.types-mobile_dropdown" ).addClass( "hide" ) ;
-                }
-                if( !mfilter_drop_down_list.find( "li.difficulty-mobile_dropdown" ).hasClass( "hide" ) ) {
-                    mfilter_drop_down_list.find( "li.difficulty-mobile_dropdown" ).addClass( "hide" ) ;
-                }
-                if( !mfilter_drop_down_list.find( "li.duration-mobile_dropdown" ).hasClass( "hide" ) ) {
-                    mfilter_drop_down_list.find( "li.duration-mobile_dropdown" ).addClass( "hide" ) ;
-                }
+                $("#predesigned_filters--types-mobile").prop("disabled", true ) ;
+                $("#predesigned_filters--conditions-mobile").prop("disabled", true ) ;                                
             } else { // Display Conditions Drop Down
                 // Desktop
                 if( filter_drop_down.hasClass( "custom-category-displayed" ) ) {
@@ -1369,27 +1203,108 @@
                     filter_drop_down.find( ".filter--drop_down_conditions-wrapper" ).addClass( "active" ) ;
                 }                
 
-                // Mobile
-                if( !mfilter_drop_down_list.find( "li.conditions-mobile_dropdown" ).hasClass( "active" ) ) {
-                    mfilter_drop_down_list.find( "li.conditions-mobile_dropdown" ).addClass( "active" ) ;
-                }
-                if( mfilter_drop_down_list.find( "li.subcategories-mobile_dropdown" ).hasClass( "active" ) ) {
-                    mfilter_drop_down_list.find( "li.subcategories-mobile_dropdown" ).removeClass( "active" ) ;
-                }
-                if( mfilter_drop_down_list.find( "li.types-mobile_dropdown" ).hasClass( "hide" ) ) {
-                    mfilter_drop_down_list.find( "li.types-mobile_dropdown" ).removeClass( "hide" ) ;
-                }
-                if( mfilter_drop_down_list.find( "li.types-mobile_dropdown" ).hasClass( "hide" ) ) {
-                    mfilter_drop_down_list.find( "li.types-mobile_dropdown" ).removeClass( "hide" ) ;
-                }
-                if( mfilter_drop_down_list.find( "li.difficulty-mobile_dropdown" ).hasClass( "hide" ) ) {
-                    mfilter_drop_down_list.find( "li.difficulty-mobile_dropdown" ).removeClass( "hide" ) ;
-                }
-                if( mfilter_drop_down_list.find( "li.duration-mobile_dropdown" ).hasClass( "hide" ) ) {
-                    mfilter_drop_down_list.find( "li.duration-mobile_dropdown" ).removeClass( "hide" ) ;
+                // Mobile                
+                $("#predesigned_filters--types-mobile").prop("disabled", false ) ;                
+                $("#predesigned_filters--conditions-mobile").prop("disabled", false ) ;                                
+            }
+        }
+        
+        // 2.13 Add/Remove bubbles from filter breadcrumb
+        function filter_breadcrumb( oid, title, type, mode ) {                                    
+            if( mode == "add" ) {
+                var _atmp = {} ;
+                _atmp["oid"] = oid ;
+                _atmp["title"] = title ;
+                _atmp["type"] = type ;
+                selected_filters[type] = _atmp ;                
+            } else if( mode == "remove" ) {
+                var _atmp = {} ;
+                _atmp["oid"] = oid ;
+                _atmp["title"] = title ;
+                _atmp["type"] = type ;
+                remove_filter( oid, type ) ;     
+            }            
+            render_selected_filters( ) ;
+        }
+
+        // 2.14 Remove a filter click handler
+        function remove_filter( oid, type ) {  
+            if( selected_filters[type]["oid"] == oid ) {
+                selected_filters[type] = {} ;
+            }                           
+            render_selected_filters( ) ;
+        }
+        
+        // 2.15 Render Selected Filter Breadcrumb
+        function render_selected_filters(){
+            var _p = $(".predesigned--filter_crumbtrail") ;
+            var _p_m = $(".mobile-predesigned--filter_crumbtrail") ;
+            var _a = selected_filters ;
+
+            _p.html( "" ) ; // Clear all bubbles
+            _p_m.html( "" ) ;
+
+            if( typeof _a["bodyregion"]["oid"] !== 'undefined' ) {
+                if( _a["bodyregion"]["oid"] != 0 ) {
+                    var _tmp = '<li class="service-bubble" data-oid="'+_a["bodyregion"]["oid"]+'" data-type="'+_a["bodyregion"]["type"]+'"><span class="bubble-button-label">'+_a["bodyregion"]["title"]+'</span><span class="remove_filter"><i class="fas fa-times"></i></span></li>' ;
+                    _p.append( _tmp ) ;
+                    _p_m.append( _tmp ) ;
                 }
             }
-        }        
+
+            if( typeof _a["type"]["oid"] !== 'undefined' ) {
+                var _tmp = '<li class="service-bubble" data-oid="'+_a["type"]["oid"]+'" data-type="'+_a["type"]["type"]+'"><span class="bubble-button-label">'+_a["type"]["title"]+'</span><span class="remove_filter"><i class="fas fa-times"></i></span></li>' ;
+                _p.append( _tmp ) ;
+                _p_m.append( _tmp ) ;
+            }            
+
+            if( typeof _a["condition"]["oid"] !== 'undefined' ) {
+                var _tmp = '<li class="service-bubble" data-oid="'+_a["condition"]["oid"]+'" data-type="'+_a["condition"]["type"]+'"><span class="bubble-button-label">'+_a["condition"]["title"]+'</span><span class="remove_filter"><i class="fas fa-times"></i></span></li>' ;
+                _p.append( _tmp ) ;
+                _p_m.append( _tmp ) ;
+            }
+
+            $("ul.predesigned--filter_crumbtrail li.service-bubble span.remove_filter").unbind( "click" ).on( "click", remove_filter_bubble ) ;
+            $("ul.mobile-predesigned--filter_crumbtrail li.service-bubble span.remove_filter").unbind( "click" ).on( "click", remove_filter_bubble ) ;
+        }
+
+        // 2.16 Render Selected Filter Breadcrumb
+        function remove_filter_bubble( ) {
+            var oid = $(this).parent().data( "oid" ) ;
+            var type = $(this).parent().data( "type" ) ;            
+            switch( type ) {
+                case "bodyregion": {
+                    __page_request_values["c"] = 0 ;    // Selected Category    
+                    __page_request_values["c1"] = 0 ;    // Selected Category    
+                    if( __page_request_values["f1"] == 1 ) {
+                        remove_filter( __page_request_values["f4"], "condition" ) ;
+                        __page_request_values["f4"] = 0 ;   
+                        remove_filter( 1, "type" ) ;
+                        __page_request_values["f1"] = 0 ;   
+                    }           
+                } break ;
+                case "type": {
+                    // type == condition specific, set condition filter to zero
+                    __page_request_values["f1"] = 0 ;   // Type Filter
+                    if( __page_request_values["f1"] == 1 ) {
+                        remove_filter( __page_request_values["f4"], "condition" ) ;
+                        __page_request_values["f4"] = 0 ;                   
+                        remove_filter( 1, "type" ) ;
+                        __page_request_values["f1"] = 0 ;   
+                    }
+                } break ;                
+                case "condition": {
+                    remove_filter( __page_request_values["f4"], "condition" ) ;
+                    __page_request_values["f4"] = 0 ;   // Condition Filter
+                    remove_filter( 1, "type" ) ;
+                        __page_request_values["f1"] = 0 ;   
+                } break ;                
+            }
+            remove_filter( oid, type ) ;
+            setFilters( ) ;
+            render_selected_filters( ) ;     
+            requestPrograms( ) ;    
+        };
 
 // **********************************************************************************
 // 3.0 SEARCH / SEARCH BAR METHODS
@@ -1565,9 +1480,6 @@
                     url += key + "=" + $.trim( value ) + "&" ;          
                 });
                 url = url.substring(0, url.length - 1);
-                //if( __save_state_cookie ) {
-                //    Cookies.set('ptlinkedQueryState', url, { domain: '.ptlinked.com', secure: true } ) ;        
-                //}
             }   
 
             url += "&i=" + current_index + "&m=" + record_chunks ;
@@ -1651,7 +1563,6 @@
             }         
         }
 
-
         /* 3.4.1 Remove the selected exercise program */        
         function __remove_program( ) {
             var url = options["api_root_url"] + "/users/remove_favorite" ;   
@@ -1686,7 +1597,6 @@
                 }        
             });
         }
-
 
         /* 3.5 Open selected exercise program */
         function open_exercise_program( e ) {
@@ -1810,12 +1720,16 @@
             initThumbnailBar( ) ;
             initVideoSource( ) ;
             init_viewer_toolbar( ) ;
-            initThumbnailScrollMechanics( ) ;
+            initThumbnailScrollMechanics( ) ;            
 
             var viewer = $(".ptlinked--exercise_program_viewer") ;
 
             if( !viewer.hasClass( "displayed" ) ) {
                 viewer.addClass( "displayed" ) ;
+            }
+
+            if( !$(".mdvip--viewer_overaly").hasClass( "display" ) ) {
+                $(".mdvip--viewer_overaly").addClass( "display" ) ;
             }
 
             calc_viewer_container_height( ) ; // Calculate the viewers container height
@@ -1824,7 +1738,11 @@
                 if( viewer.hasClass( "displayed" ) ) {
                     viewer.removeClass( "displayed" ) ;
                 }                
+                if( $(".mdvip--viewer_overaly").hasClass( "display" ) ) {
+                    $(".mdvip--viewer_overaly").removeClass( "display" ) ;
+                }
             });
+            $("#viewer--exercise_container_wrapper").scrollTop( 0 ) ;
         }
 
         // 4.4 Initialize the thumbnail bar
@@ -1881,9 +1799,14 @@
         // 4.7 Thumbnail Anchor handler
         function scrollToAnchor(aid){
             var aTag = $("div[name='"+ aid +"']");
-            var id = parseInt( aid.replace( "exercise-", "" ) ) ;
-            var offset = ( ( id  ) * 543 ) ;//+ 505;        
-            $('#viewer--exercise_container_wrapper').animate({scrollTop: offset },'slow');
+            var id = parseInt( aid.replace( "exercise-", "" ) ) ;   
+            var exercise_block_offset = $(".viewer--exercise_item[data-oid='"+id+"']").offset().top ;
+            var container_offset = $("#viewer--exercise_container_wrapper").offset().top ;
+            var container_scrollTop = $("#viewer--exercise_container_wrapper").scrollTop();
+            var position = exercise_block_offset 
+                - container_offset 
+                + container_scrollTop ;
+            $('#viewer--exercise_container_wrapper').animate({scrollTop: position },'slow');
         }
 
         // 4.8 Initialize the Hor. scroll mechanices
@@ -1896,7 +1819,12 @@
             var scrollWindowWidth = $(_root).find(".workout-preview__filmstrip").get(0).offsetWidth ;
             var scrollPosition = scrollContainer.scrollLeft( ) ;
             var totalScrollWidth = scrollContainer.get(0).scrollWidth + 80 ;
-            var farRightOffset = 0 ;    
+            var farRightOffset = 0 ;                
+            // reset scroll position
+            if( $(_root).find(".left-arrow").hasClass( "show-arrow" ) ) {
+                $(_root).find(".left-arrow").removeClass( "show-arrow" ) ;
+            }
+            scrollContainer.scrollLeft( 0 ) ;
 
             if( totalScrollWidth > scrollWindowWidth ) {
                 if( !$(_root).find(".right-arrow").hasClass( "show-arrow" ) ) {
@@ -2077,7 +2005,8 @@
             $bel = $( "body" ) ;
             $bel.append( __build_exercise_program_viewer() ) ;
             $bel.append( __build_mobile_filter_menu( ) ) ;     
-            $bel.append( __build_dialogbox_templates( ) ) ;                   
+            $bel.append( __build_dialogbox_templates( ) ) ;
+            $bel.append( __build_filter_dropdown( ) ) ;                   
         }
 
         // 5.2 Build mobile search panel HTML
@@ -2085,13 +2014,13 @@
             var mobile_search_panel_html = "" ;
             mobile_search_panel_html = '<div class="navbar-mobile--search_panel">' +
                 '<div class="input-group search-input__outer-container">' +
-                    '<div class="input-group-prepend">' +
-                        '<button class="btn btn-secondary search-input__search-button" id="ptl-mobile_filter_button" type="button">' +
-                            '<svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="sliders-h" class="svg-inline--fa fa-sliders-h fa-w-16 icon--search" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M496 384H160v-16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v16H16c-8.8 0-16 7.2-16 16v32c0 8.8 7.2 16 16 16h80v16c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16v-16h336c8.8 0 16-7.2 16-16v-32c0-8.8-7.2-16-16-16zm0-160h-80v-16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v16H16c-8.8 0-16 7.2-16 16v32c0 8.8 7.2 16 16 16h336v16c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16v-16h80c8.8 0 16-7.2 16-16v-32c0-8.8-7.2-16-16-16zm0-160H288V48c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v16H16C7.2 64 0 71.2 0 80v32c0 8.8 7.2 16 16 16h208v16c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16v-16h208c8.8 0 16-7.2 16-16V80c0-8.8-7.2-16-16-16z"></path></svg>' +
-                        '</button>' +
-                    '</div>' +                                      
-                    '<input label="search" type="text" class="form-control search-input__search-container" id="mheader-search" placeholder="Find an exercise program...">' +
-                    '<div class="mheader-search-bar-clear" title="Clear search">X</div>' +
+                    //'<div class="input-group-prepend">' +
+                    //    '<button class="btn btn-secondary search-input__search-button" id="ptl-mobile_filter_button" type="button">' +
+                    //        '<svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="sliders-h" class="svg-inline--fa fa-sliders-h fa-w-16 icon--search" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M496 384H160v-16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v16H16c-8.8 0-16 7.2-16 16v32c0 8.8 7.2 16 16 16h80v16c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16v-16h336c8.8 0 16-7.2 16-16v-32c0-8.8-7.2-16-16-16zm0-160h-80v-16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v16H16c-8.8 0-16 7.2-16 16v32c0 8.8 7.2 16 16 16h336v16c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16v-16h80c8.8 0 16-7.2 16-16v-32c0-8.8-7.2-16-16-16zm0-160H288V48c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v16H16C7.2 64 0 71.2 0 80v32c0 8.8 7.2 16 16 16h208v16c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16v-16h208c8.8 0 16-7.2 16-16V80c0-8.8-7.2-16-16-16z"></path></svg>' +
+                    //    '</button>' +
+                    //'</div>' +                                      
+                    '<input label="search" type="text" class="form-control search-input__search-container" id="mheader-search" placeholder="Find an exercise program">' +
+                    //'<div class="mheader-search-bar-clear" title="Clear search">X</div>' +
                     '<div class="input-group-append">' +
                         '<button class="btn btn-secondary search-input__search-button" id="ptl-mobile_search_button" type="button">' +
                             '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" class="icon icon--search">' +
@@ -2101,6 +2030,12 @@
                         '</button>' +
                     '</div>' +
                 '</div>' +
+                '<div id="mobile-predesigned--filter_link">' +
+                    '<div class="mobile-filter-link"><i class="fas fa-sliders-h"></i>FILTERS</div>' +
+                '</div>' +
+                '<div id="mobile-predesigned--crumbtrail_bubbles">' +
+                    '<ul class="mobile-predesigned--filter_crumbtrail"></ul>' +                                    
+                '</div>' +
             '</div>' ;
 
             return mobile_search_panel_html ;
@@ -2108,11 +2043,16 @@
 
         // 5.3 Build Category Slider HTML
         function __build_category_slider( ) {
+            var mode = "" ;
+            if( options["category_slider_style"] == "mdvip" ) {
+                mode = "mdvip" ;
+            }
             var category_slider_html = "" ;
-            category_slider_html = '<div class="scroll-container">' +
-                '<div class="left-arrow"><svg class="icon icon--arrow-left" stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 256 512" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M31.7 239l136-136c9.4-9.4 24.6-9.4 33.9 0l22.6 22.6c9.4 9.4 9.4 24.6 0 33.9L127.9 256l96.4 96.4c9.4 9.4 9.4 24.6 0 33.9L201.7 409c-9.4 9.4-24.6 9.4-33.9 0l-136-136c-9.5-9.4-9.5-24.6-.1-34z"></path></svg></div>' +
+            category_slider_html = '<div class="scroll-container '+mode+'">' +
+                '<div class="divider-line"></div>' +
+                '<div class="left-arrow"><svg class="icon icon--mdvip-arrow-left" aria-hidden="true" focusable="false" data-prefix="fal" data-icon="chevron-left" class="svg-inline--fa fa-chevron-left fa-w-8" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512"><path fill="currentColor" d="M238.475 475.535l7.071-7.07c4.686-4.686 4.686-12.284 0-16.971L50.053 256 245.546 60.506c4.686-4.686 4.686-12.284 0-16.971l-7.071-7.07c-4.686-4.686-12.284-4.686-16.97 0L10.454 247.515c-4.686 4.686-4.686 12.284 0 16.971l211.051 211.05c4.686 4.686 12.284 4.686 16.97-.001z"></path></svg><svg class="icon icon--arrow-left" stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 256 512" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M31.7 239l136-136c9.4-9.4 24.6-9.4 33.9 0l22.6 22.6c9.4 9.4 9.4 24.6 0 33.9L127.9 256l96.4 96.4c9.4 9.4 9.4 24.6 0 33.9L201.7 409c-9.4 9.4-24.6 9.4-33.9 0l-136-136c-9.5-9.4-9.5-24.6-.1-34z"></path></svg></div>' +
                 '<ul class="category-bubbles-list container-fluid"></ul>' +
-                '<div class="right-arrow show-arrow"><svg class="icon icon--arrow-right" stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 256 512" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M224.3 273l-136 136c-9.4 9.4-24.6 9.4-33.9 0l-22.6-22.6c-9.4-9.4-9.4-24.6 0-33.9l96.4-96.4-96.4-96.4c-9.4-9.4-9.4-24.6 0-33.9L54.3 103c9.4-9.4 24.6-9.4 33.9 0l136 136c9.5 9.4 9.5 24.6.1 34z"></path></svg></div>' +
+                '<div class="right-arrow show-arrow"><svg class="icon icon--mdvip-arrow-right" aria-hidden="true" focusable="false" data-prefix="fal" data-icon="chevron-right" class="svg-inline--fa fa-chevron-right fa-w-8" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512"><path fill="currentColor" d="M17.525 36.465l-7.071 7.07c-4.686 4.686-4.686 12.284 0 16.971L205.947 256 10.454 451.494c-4.686 4.686-4.686 12.284 0 16.971l7.071 7.07c4.686 4.686 12.284 4.686 16.97 0l211.051-211.05c4.686-4.686 4.686-12.284 0-16.971L34.495 36.465c-4.686-4.687-12.284-4.687-16.97 0z"></path></svg><svg class="icon icon--arrow-right" stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 256 512" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M224.3 273l-136 136c-9.4 9.4-24.6 9.4-33.9 0l-22.6-22.6c-9.4-9.4-9.4-24.6 0-33.9l96.4-96.4-96.4-96.4c-9.4-9.4-9.4-24.6 0-33.9L54.3 103c9.4-9.4 24.6-9.4 33.9 0l136 136c9.5 9.4 9.5 24.6.1 34z"></path></svg></div>' +
             '</div>' ;
 
             return category_slider_html ;
@@ -2124,55 +2064,13 @@
 
             filter_block_html = '<div id="grid-filter" class="">' +
                         '<div class="grid-filter--wrapper">' +
-                            '<div class="grid-filter--inner_wrapper">' +
-                                '<div class="grid-filter--activator_wrapper">' +
-                                    '<span class="card--grid_filter" id="mmenu--filter"><svg aria-hidden="true" focusable="false" data-prefix="far" data-icon="sliders-h" class="svg-inline--fa fa-sliders-h fa-w-16 mr-3" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M496 72H288V48c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v24H16C7.2 72 0 79.2 0 88v16c0 8.8 7.2 16 16 16h208v24c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16v-24h208c8.8 0 16-7.2 16-16V88c0-8.8-7.2-16-16-16zm0 320H160v-24c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v24H16c-8.8 0-16 7.2-16 16v16c0 8.8 7.2 16 16 16h80v24c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16v-24h336c8.8 0 16-7.2 16-16v-16c0-8.8-7.2-16-16-16zm0-160h-80v-24c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v24H16c-8.8 0-16 7.2-16 16v16c0 8.8 7.2 16 16 16h336v24c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16v-24h80c8.8 0 16-7.2 16-16v-16c0-8.8-7.2-16-16-16z"></path></svg>Filter</span>' +
-                                    '<span class="card--grid_filter_clear" id="mmenu--filter_clear">Clear filters&nbsp;&nbsp;X</span>' +
-                                '</div>' +
-                                '<div class="grid-filter--drop_down">' +
-                                    '<div class="container">' +
-                                        '<div class="grid-filter--option_wrapper">' +
-                                            '<div class="col-6 padding-right-50">' +
-                                                '<div class="filter--drop_down_conditions-wrapper active"><select style="width: 100%; font-size: 1.4rem; height: 2.5rem;" id="predesigned_filters--conditions"></select></div>' +
-                                                '<div class="filter--drop_down_subcategories-wrapper"><select style="width: 100%; font-size: 1.4rem; height: 2.5rem;" id="predesigned_filters--subcategories"></select></div>' +
-                                            '</div>' +
-                                            '<div class="col-6 padding-right-50">' +
-                                                '<select style="width: 100%; font-size: 1.4rem; height: 2.5rem;" id="predesigned_filters--equipment"></select>' +
-                                            '</div>' +
-                                        '</div>' +
-                                        '<div class="grid-filter--filter_label_wrapper">' +
-                                            '<div class="col-4 padding-right-50 padding-left-20">' +
-                                                '<span class="grid-filter--column_header">Type</span>' +
-                                            '</div>' +
-                                            '<div class="col-4 padding-right-50 padding-left-20">' +
-                                                '<span class="grid-filter--column_header">Difficulty</span>' +
-                                            '</div>' +
-                                            '<div class="col-4 padding-right-50 padding-left-20">' +
-                                                '<span class="grid-filter--column_header">Duration</span>' +
-                                            '</div>' +
-                                        '</div>' +
-                                        '<div class="grid-filter--filter_options_wrapper">' +
-                                            '<div class="col-4 padding-right-50">' +
-                                                '<div class="grid-filter--column_options">' +
-                                                    '<ul id="predesigned_filters--types"></ul>' +
-                                                '</div>' +
-                                            '</div>' +
-                                            '<div class="col-4 padding-right-50">' +
-                                                '<div class="grid-filter--column_options">' +
-                                                    '<ul id="predesigned_filters--difficulty"></ul>' +
-                                                '</div>' +
-                                            '</div>' +
-                                            '<div class="col-4 padding-right-50">' +
-                                                '<div class="grid-filter--column_options">' +
-                                                    '<ul id="predesigned_filters--duration"></ul>' +
-                                                '</div>' +
-                                            '</div>' +
-                                        '</div>' +
-                                    '</div>' +
+                            '<div class="grid-filter--inner_wrapper">' +     
+                                '<div id="predesigned--crumbtrail_bubbles">' +
+                                    '<ul class="predesigned--filter_crumbtrail"></ul>' +                                    
                                 '</div>' +
                                 '<div class="grid-filter--search_wrapper">' +
                                     '<div class="input-group search-input__outer-container">' +
-                                        '<input label="search" type="text" class="form-control search-input__search-container" id="header-search" placeholder="Find an exercise program...">' +
+                                        '<input label="search" type="text" class="form-control search-input__search-container" id="header-search" placeholder="Find an exercise program">' +
                                         '<div class="header-search-bar-clear" title="Clear search">X</div>' +
                                         '<div class="input-group-append">' +
                                             '<button class="btn btn-secondary search-input__search-button" id="search-icon-legacy" type="button">' +
@@ -2199,10 +2097,12 @@
                     '<div id="predesigned--results_display" class="cards--grid_container"></div>' +
                     '<div id="load-more-records" class="loading-more-wrapper"><div class="btn-load_more_records"><svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="spinner-third" class="svg-inline--fa fa-spinner-third fa-w-16 fa-spin margin-right-10" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M456.433 371.72l-27.79-16.045c-7.192-4.152-10.052-13.136-6.487-20.636 25.82-54.328 23.566-118.602-6.768-171.03-30.265-52.529-84.802-86.621-144.76-91.424C262.35 71.922 256 64.953 256 56.649V24.56c0-9.31 7.916-16.609 17.204-15.96 81.795 5.717 156.412 51.902 197.611 123.408 41.301 71.385 43.99 159.096 8.042 232.792-4.082 8.369-14.361 11.575-22.424 6.92z"></path></svg>Loading...</div></div>' +
                     '<div id="predesigned--no_results_display" class="cards--grid_container info-box-item">' +
-                        '<div class="no_results--wrapper container text-center">' +
-                            '<h1 class="no_results--title">No Results</h1>' +
-                            '<p>Sorry, we are unable to find any exercise programs with the filters and search terms you are using.</p>' +
-                            '<p>Please try a different combination of filters and/or search terms.</p>' +               
+                        '<div class="no_results--wrapper container text-left">' +
+                            '<div class="no_results-flex_box">' +
+                                '<i class="fas fa-exclamation-triangle"></i>' +
+                                '<h1 class="no_results--title">No Results</h1>' +
+                                '<p>Sorry, we are unable to find any exercise programs with the filters and/or search terms you are using.<br /><br />Please try a different combination of filters and/or search terms.</p>' +                                
+                            '</div>' +
                             '<p class="subtext"><br /><br /><strong>NOTE:</strong>  Every exercise program published on this site has been created and reviewed by a team of licensed physical therapists.</p>' +
                         '</div>' +
                     '</div>' +                    
@@ -2223,16 +2123,14 @@
         function __build_mobile_filter_menu( ) {
             var results_container_html = "" ;
             results_container_html = '<div class="mobile-filter-panel">' +
-                '<ul class="mobile-filter-panel_list">' +
-                    '<li class="double-divider" id="mbtn-close_filter_menu">X&nbsp;&nbsp;Filter<span class="mobile--grid_filter_clear float-right" id="mobile--filter_clear">Clear filters<i class="fas fa-times-circle ml-3 mr-0"></i></span></li>' +
-                    '<li class="single-divider"><div class="mobile-filter--label">Body Region:</div><div class="mobile-filter--value" data-f="c"><select style="width: 100%; font-size: 1.4rem; height: 2.5rem;" id="predesigned_filters--bodyregion-mobile"></select></div><div class="mobile-filter--clear" title="Clear body region filter" data-toggle="tooltip">X</div></li>' +
-                    '<li class="single-divider conditions-mobile_dropdown active"><div class="mobile-filter--label">Condition:</div><div class="mobile-filter--value" data-f="f4"><select style="width: 100%; font-size: 1.4rem; height: 2.5rem;" id="predesigned_filters--conditions-mobile"></select></div><div class="mobile-filter--clear" title="Clear condition filter" data-toggle="tooltip">X</div></li>' +
-                    '<li class="single-divider subcategories-mobile_dropdown"><div class="mobile-filter--label">Sub-Category:</div><div class="mobile-filter--value" data-f="c1"><select style="width: 100%; font-size: 1.4rem; height: 2.5rem;" id="predesigned_filters--subcategories-mobile"></select></div><div class="mobile-filter--clear" title="Clear sub-category filter" data-toggle="tooltip">X</div></li>' +
-                    '<li class="single-divider types-mobile_dropdown"><div class="mobile-filter--label">Type:</div><div class="mobile-filter--value" data-f="f1"><select style="width: 100%; font-size: 1.4rem; height: 2.5rem;" id="predesigned_filters--types-mobile"></select></div><div class="mobile-filter--clear" title="Clear type filter" data-toggle="tooltip">X</div></li>' +
-                    '<li class="single-divider difficulty-mobile_dropdown"><div class="mobile-filter--label">Difficulty:</div><div class="mobile-filter--value" data-f="f2"><select style="width: 100%; font-size: 1.4rem; height: 2.5rem;" id="predesigned_filters--difficulty-mobile"></select></div><div class="mobile-filter--clear" title="Clear difficulty filter" data-toggle="tooltip">X</div></li>' +
-                    '<li class="single-divider equipment-mobile_dropdown"><div class="mobile-filter--label">Equipment:</div><div class="mobile-filter--value" data-f="f5"><select style="width: 100%; font-size: 1.4rem; height: 2.5rem;" id="predesigned_filters--equipment-mobile"></select></div><div class="mobile-filter--clear" title="Clear equipment filter" data-toggle="tooltip">X</div></li>' +
-                    '<li class="single-divider duration-mobile_dropdown"><div class="mobile-filter--label">Duration:</div><div class="mobile-filter--value" data-f="f3"><select style="width: 100%; font-size: 1.4rem; height: 2.5rem;" id="predesigned_filters--duration-mobile"></select></div><div class="mobile-filter--clear" title="Clear duration filter" data-toggle="tooltip">X</div></li>' +                    
+                '<ul class="mobile-filter-panel_list">' +                    
+                    '<li class="double-divider" id="mbtn-close_filter_menu"><span class="mobile-grid_filter_title">Filters</span><span class="mobile--grid_filter_clear" id="mobile--filter_clear">Clear All Filters</span><span class="mobile--grid_filter_close"><i class="fas fa-times-circle"></i></span></li>' +
+                    '<li class="single-divider"><div class="mobile-filter--value" data-f="c"><select style="width: 100%; font-size: 1.4rem; height: 2.5rem;" id="predesigned_filters--bodyregion-mobile"></select></div></li>' +
+                    '<li class="single-divider types-mobile_dropdown"><div class="mobile-filter--value" data-f="f1"><select style="width: 100%; font-size: 1.4rem; height: 2.5rem;" id="predesigned_filters--types-mobile"></select></div></li>' +
+                    '<li class="single-divider conditions-mobile_dropdown active"><div class="mobile-filter--value" data-f="f4"><select style="width: 100%; font-size: 1.4rem; height: 2.5rem;" id="predesigned_filters--conditions-mobile"></select></div></li>' +
                 '</ul>' +
+                '<input type="hidden" id="selected_bodyregion_id__m" value="" />' +
+                '<div class="ptlinked--m_bodyregion_highlight"><div class="highlight-label">Hip</div><img src="/examples/MDVIP-1.0.1/images/bodyregion_highlights/bodyregion--hip.png" /></div>' +
             '</div>' ;
 
             return results_container_html ;
@@ -2240,66 +2138,57 @@
 
         // 5.7 Build the Exercise Program Viewer Container
         function __build_exercise_program_viewer( ) {
-            var results_container_html = "" ;
-            results_container_html = '<div class="ptlinked--exercise_program_viewer">' +
+            var mode = "" ;
+            if( options["exercise_program_viewer"] == "modal" ) {
+                mode = "mdvip-modal" ;
+            }
+            var results_container_html = "" ;            
+            results_container_html = '<div class="ptlinked--exercise_program_viewer '+mode+'">' +
                 '<div class="viewer--header">' +
                     '<div class="viewer--header_inner">' +
                         '<div class="viewer--header_main">' +
-                            '<div class="viewer--site-logo">' +
-                                '<a href="https://mdvip.com" rel="home" class="site-logo__container" title="MDVIP Connect Portal">' +
-                                  '<svg viewBox="0 0 744.56 183.45" xmlns="http://www.w3.org/2000/svg" class="icon icon--mdvip-logo-white">' +
-                                    '<g fill="#fff">' +
-                                      '<path d="m608.84 7.41h21v165.89h-22.91v6.15h72.55v-6.15h-23.72v-74.13h12.8c56 0 76-28.56 76-50.42 0-23.46-15.45-47.46-64.78-47.46h-70.94zm46.92 0h7.45c36 0 53.08 2.95 53.08 40.28 0 29.61-8 45.34-51.49 45.34h-9z"></path>' +
-                                      '<path d="m546.2 173.3h-22.97v6.15h71.73v-6.15h-22.93v-165.88h22.93v-6.13h-72.71v6.13h23.95z"></path>' +
-                                      '<path d="m500.19 1.29h-1.68-31.73v6.13h24.26l-42.92 133.09h-.55l-44.79-133.09h20.77v-6.13h-67.45v6.13h19.47l59.74 176.03h6.66l56.54-176.03h1.68 16.08v-6.13z"></path>' +
-                                      '<path d="m213 1.29h76.64c54.66 0 87.36 33.21 87.36 88.38 0 58.43-33.2 89.87-87.38 89.87h-76.62zm46.43 138.31h22c35.19-.76 49.18-14.48 49.18-50.18 0-32.46-17.48-48.19-49.18-48.19h-22z"></path>' +
-                                      '<path d="m117.32 83.89c0-6.72-5.48-12.34-12.95-14.21l-1.71 28.85c8.34-1.37 14.66-7.41 14.66-14.64z"></path>' +
-                                      '<path d="m81.41 83.89c0 7.23 6.3 13.27 14.65 14.64l-1.71-28.85c-7.46 1.87-12.94 7.49-12.94 14.21z"></path>' +
-                                      '<path d="m154.68 0c-1 1.9-3.05 5.92-3.79 7.34l-16.89-6.41-1.09 2.86 13.55 5.15c-.94 1.75-2.52 4.74-3.2 6l-23.81-9.43-1.11 2.87 20.22 8c-.92 1.82-2.54 4.95-3.2 6.25-1.65-.68-17.54-7.21-27.44-11.3l-3.22 52.67c9.75-2.07 17-9.3 17-17.9 0-7-4.81-13.17-11.9-16.28l.85-7.28c10.25 3.71 18.33 11.83 18 23.57-.25 9.54-7.9 17.75-18.25 21.28 6.88 3.23 11.54 9.29 11.54 16.22 0 7.77-5.81 14.4-14.06 17.22 5.27 2.25 8.9 6.68 8.9 11.89 0 6.6-5.79 12.07-13.45 13.26l.27-2.87c5.67-1.26 9.84-5.41 9.84-10.41 0-5.37-4.78-9.77-11-10.63l-3 37.69-3-37.69c-6.26.86-11 5.26-11 10.63 0 5 4.19 9.15 9.85 10.41l.27 2.87c-7.81-1.23-13.56-6.7-13.56-13.3 0-5.21 3.63-9.64 8.89-11.89-8.27-2.79-14.1-9.45-14.1-17.22 0-6.93 4.66-13 11.55-16.22-10.34-3.53-18-11.74-18.24-21.28-.32-11.74 7.77-19.86 18-23.57l.9 7.28c-7.13 3.11-11.94 9.22-11.94 16.28 0 8.6 7.21 15.83 17 17.9l-3.26-52.65c-9.89 4.09-25.8 10.62-27.43 11.3-.66-1.3-2.29-4.43-3.21-6.25l20.22-8-1.11-2.85-23.84 9.42c-.66-1.25-2.27-4.24-3.19-6l13.54-5.14-1.09-2.86-16.85 6.41c-.73-1.42-2.84-5.44-3.84-7.34h-44v178.27h43.68v-135.27h.5l37.46 135.27h35.44l37.46-135.27h.46v135.27h43.58v-178.27z"></path>' +
-                                    '</g>' +
-                                  '</svg>' +
-                                '</a>' +
-                              '</div>' +
-                              '<div class="viewer--metadata-block-mobile-wrapper">';
-                                results_container_html += '<span class="metadata-block text-right margin-left-20 is-clickable btn-print_program" data-code="QDG081"><svg aria-hidden="true" focusable="false" data-prefix="far" data-icon="print" class="svg-inline--fa fa-print fa-w-16 mr-2" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M400 264c-13.25 0-24 10.74-24 24 0 13.25 10.75 24 24 24s24-10.75 24-24c0-13.26-10.75-24-24-24zm32-88V99.88c0-12.73-5.06-24.94-14.06-33.94l-51.88-51.88c-9-9-21.21-14.06-33.94-14.06H110.48C93.64 0 80 14.33 80 32v144c-44.18 0-80 35.82-80 80v128c0 8.84 7.16 16 16 16h64v96c0 8.84 7.16 16 16 16h320c8.84 0 16-7.16 16-16v-96h64c8.84 0 16-7.16 16-16V256c0-44.18-35.82-80-80-80zM128 48h192v48c0 8.84 7.16 16 16 16h48v64H128V48zm256 416H128v-64h256v64zm80-112H48v-96c0-17.64 14.36-32 32-32h352c17.64 0 32 14.36 32 32v96z"></path></svg><span class="label">Print</span></span>' ;
-                                if( !options["training_mode"] && options["save_favorites"] ) {
-                                    results_container_html += '<span class="metadata-block text-right margin-left-20 is-clickable btn-save_program" data-code="QDG081"><svg aria-hidden="true" focusable="false" data-prefix="far" data-icon="save" class="svg-inline--fa fa-save fa-w-14 mr-2" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M433.941 129.941l-83.882-83.882A48 48 0 0 0 316.118 32H48C21.49 32 0 53.49 0 80v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V163.882a48 48 0 0 0-14.059-33.941zM272 80v80H144V80h128zm122 352H54a6 6 0 0 1-6-6V86a6 6 0 0 1 6-6h42v104c0 13.255 10.745 24 24 24h176c13.255 0 24-10.745 24-24V83.882l78.243 78.243a6 6 0 0 1 1.757 4.243V426a6 6 0 0 1-6 6zM224 232c-48.523 0-88 39.477-88 88s39.477 88 88 88 88-39.477 88-88-39.477-88-88-88zm0 128c-22.056 0-40-17.944-40-40s17.944-40 40-40 40 17.944 40 40-17.944 40-40 40z"></path></svg><span class="label">Save</span></span>' ;
-                                }
-                                if( !options["training_mode"] && options["secure_messaging"] && options["user_type"] == "physician" ) {
-                                  results_container_html += '<span class="metadata-block text-right margin-left-20 is-clickable btn-share_program" data-code="QDG081"><svg aria-hidden="true" focusable="false" data-prefix="far" data-icon="share" class="svg-inline--fa fa-share fa-w-18 mr-2" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><path fill="currentColor" d="M561.938 190.06L385.94 14.107C355.79-16.043 304 5.327 304 48.047v80.703C166.04 132.9 0 159.68 0 330.05c0 73.75 38.02 134.719 97.63 173.949 37.12 24.43 85.84-10.9 72.19-54.46C145.47 371.859 157.41 330.2 304 321.66v78.28c0 42.64 51.73 64.15 81.94 33.94l175.997-175.94c18.751-18.74 18.751-49.14.001-67.88zM352 400V272.09c-164.521 1.79-277.44 33.821-227.98 191.61C88 440 48 397.01 48 330.05c0-142.242 160.819-153.39 304-154.02V48l176 176-176 176z"></path></svg><span class="label">Send</span></span>' ;
-                                }
+                            '<div class="metadata-block-wrapper">' ;                            
+                              results_container_html += '<span class="metadata-block text-right margin-left-20 is-clickable btn-print_program"><i class="fas fa-print"></i>Print</span>' ;
+                            if( !options["training_mode"] && options["save_favorites"] ) {
+                                results_container_html += '<span class="metadata-block text-right margin-left-20 is-clickable btn-save_program"><i class="fas fa-save"></i>Save</span>' ;
+                            }
+                            if( !options["training_mode"] && options["secure_messaging"] && options["user_type"] == "physician"  ) {
+                              results_container_html += '<span class="metadata-block text-right margin-left-20 is-clickable btn-share_program"><i class="fas fa-share-square"></i>Send</span>' ;
+                            }
+            results_container_html += '</div>' +
+                        '</div>' +  
+                          '<div class="viewer--metadata-block-mobile-wrapper">';
+                            results_container_html += '<span class="metadata-block text-right margin-left-20 is-clickable btn-print_program" data-code="QDG081"><i class="fas fa-print"></i><span class="label">Print</span></span>' ;
+                            if( !options["training_mode"] && options["save_favorites"] ) {
+                                results_container_html += '<span class="metadata-block text-right margin-left-20 is-clickable btn-save_program" data-code="QDG081"><i class="fas fa-save"></i>Save</span></span>' ;
+                            }
+                            if( !options["training_mode"] && options["secure_messaging"] && options["user_type"] == "physician" ) {
+                              results_container_html += '<span class="metadata-block text-right margin-left-20 is-clickable btn-share_program" data-code="QDG081"><i class="fas fa-share-square"></i><span class="label">Send</span></span>' ;
+                            }
     results_container_html += '</div>' +
                               '<div class="viewer--close_button">' +
                                 '<a href="javascript:;" id="viewer--close_btn">' +
-                                    '<svg aria-hidden="true" focusable="false" data-prefix="far" data-icon="times-circle" class="svg-inline--fa fa-times-circle fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200zm101.8-262.2L295.6 256l62.2 62.2c4.7 4.7 4.7 12.3 0 17l-22.6 22.6c-4.7 4.7-12.3 4.7-17 0L256 295.6l-62.2 62.2c-4.7 4.7-12.3 4.7-17 0l-22.6-22.6c-4.7-4.7-4.7-12.3 0-17l62.2-62.2-62.2-62.2c-4.7-4.7-4.7-12.3 0-17l22.6-22.6c4.7-4.7 12.3-4.7 17 0l62.2 62.2 62.2-62.2c4.7-4.7 12.3-4.7 17 0l22.6 22.6c4.7 4.7 4.7 12.3 0 17z"></path></svg>' +
+                                    '<i class="fas fa-times-circle"></i>' +
                                 '</a>' +
                               '</div>' +
                         '</div>' +
                         '<div class="viewer--header__title-wrapper">' +
-                          '<h1 class="viewer--header__title viewer--program_title"></h1>' +
-                          '<div class="metadata-block-wrapper">' ;                            
-                              results_container_html += '<span class="metadata-block text-right margin-left-20 is-clickable btn-print_program"><svg aria-hidden="true" focusable="false" data-prefix="far" data-icon="print" class="svg-inline--fa fa-print fa-w-16 mr-2" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M400 264c-13.25 0-24 10.74-24 24 0 13.25 10.75 24 24 24s24-10.75 24-24c0-13.26-10.75-24-24-24zm32-88V99.88c0-12.73-5.06-24.94-14.06-33.94l-51.88-51.88c-9-9-21.21-14.06-33.94-14.06H110.48C93.64 0 80 14.33 80 32v144c-44.18 0-80 35.82-80 80v128c0 8.84 7.16 16 16 16h64v96c0 8.84 7.16 16 16 16h320c8.84 0 16-7.16 16-16v-96h64c8.84 0 16-7.16 16-16V256c0-44.18-35.82-80-80-80zM128 48h192v48c0 8.84 7.16 16 16 16h48v64H128V48zm256 416H128v-64h256v64zm80-112H48v-96c0-17.64 14.36-32 32-32h352c17.64 0 32 14.36 32 32v96z"></path></svg>Print</span>' ;
-                            if( !options["training_mode"] && options["save_favorites"] ) {
-                                results_container_html += '<span class="metadata-block text-right margin-left-20 is-clickable btn-save_program"><svg aria-hidden="true" focusable="false" data-prefix="far" data-icon="save" class="svg-inline--fa fa-save fa-w-14 mr-2" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M433.941 129.941l-83.882-83.882A48 48 0 0 0 316.118 32H48C21.49 32 0 53.49 0 80v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V163.882a48 48 0 0 0-14.059-33.941zM272 80v80H144V80h128zm122 352H54a6 6 0 0 1-6-6V86a6 6 0 0 1 6-6h42v104c0 13.255 10.745 24 24 24h176c13.255 0 24-10.745 24-24V83.882l78.243 78.243a6 6 0 0 1 1.757 4.243V426a6 6 0 0 1-6 6zM224 232c-48.523 0-88 39.477-88 88s39.477 88 88 88 88-39.477 88-88-39.477-88-88-88zm0 128c-22.056 0-40-17.944-40-40s17.944-40 40-40 40 17.944 40 40-17.944 40-40 40z"></path></svg>Save</span>' ;
-                            }
-                            if( !options["training_mode"] && options["secure_messaging"] && options["user_type"] == "physician"  ) {
-                              results_container_html += '<span class="metadata-block text-right margin-left-20 is-clickable btn-share_program"><svg aria-hidden="true" focusable="false" data-prefix="far" data-icon="share" class="svg-inline--fa fa-share fa-w-18 mr-2" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><path fill="currentColor" d="M561.938 190.06L385.94 14.107C355.79-16.043 304 5.327 304 48.047v80.703C166.04 132.9 0 159.68 0 330.05c0 73.75 38.02 134.719 97.63 173.949 37.12 24.43 85.84-10.9 72.19-54.46C145.47 371.859 157.41 330.2 304 321.66v78.28c0 42.64 51.73 64.15 81.94 33.94l175.997-175.94c18.751-18.74 18.751-49.14.001-67.88zM352 400V272.09c-164.521 1.79-277.44 33.821-227.98 191.61C88 440 48 397.01 48 330.05c0-142.242 160.819-153.39 304-154.02V48l176 176-176 176z"></path></svg>Send</span>' ;
-                            }
-            results_container_html += '</div>' +
-                        '</div>' +
+                          '<h1 class="viewer--header__title viewer--program_title"></h1>' +                          
                     '</div>' +
                 '</div>' +
                 '<div id="viewer--header" class="viewer--header_bar">' +
                     '<div id="viewer--filmstrip" class="viewer--filmstrip_container">' +
                         '<div class="workout-preview__filmstrip">' +
-                            '<div class="left-arrow"><svg aria-hidden="true" focusable="false" data-prefix="fal" data-icon="angle-left" class="svg-inline--fa fa-angle-left fa-w-6" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 512"><path fill="currentColor" d="M25.1 247.5l117.8-116c4.7-4.7 12.3-4.7 17 0l7.1 7.1c4.7 4.7 4.7 12.3 0 17L64.7 256l102.2 100.4c4.7 4.7 4.7 12.3 0 17l-7.1 7.1c-4.7 4.7-12.3 4.7-17 0L25 264.5c-4.6-4.7-4.6-12.3.1-17z"></path></svg></div>' +
+                            '<div class="left-arrow"><i class="far fa-chevron-left"></i></div>' +
                             '<ul class="workout-preview__thumbs" id="workout-preview__thumbslider"></ul>' +
-                            '<div class="right-arrow"><svg aria-hidden="true" focusable="false" data-prefix="fal" data-icon="angle-right" class="svg-inline--fa fa-angle-right fa-w-6" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 512"><path fill="currentColor" d="M166.9 264.5l-117.8 116c-4.7 4.7-12.3 4.7-17 0l-7.1-7.1c-4.7-4.7-4.7-12.3 0-17L127.3 256 25.1 155.6c-4.7-4.7-4.7-12.3 0-17l7.1-7.1c4.7-4.7 12.3-4.7 17 0l117.8 116c4.6 4.7 4.6 12.3-.1 17z"></path></svg></div>' +
+                            '<div class="right-arrow"><i class="far fa-chevron-right"></i></div>' +
                         '</div>' +
                     '</div>' +
                 '</div>' +
                 '<div class="viewer--exercise_container" id="viewer--exercise_container_wrapper"></div>' +
             '</div>' ;
+
+            results_container_html += '<div class="mdvip--viewer_overaly"></div>' ;
 
             return results_container_html ;
         }
@@ -2339,6 +2228,33 @@
             }            
         }
 
+        // 5.9 Build Filter Drop Down
+        function __build_filter_dropdown( ) {
+            var __filter_dropdown = '<div class="ptlinked--filter_dropdown">' +
+                                        '<i class="arrow up left"></i>' +
+                                        '<div class="ptlinked-dropdown_wrapper">' +
+                                        '<input type="hidden" id="selected_bodyregion_id" value="" />' +
+                                            '<div class="ptlinked--dropdown_bodyregion_highlight"><div class="highlight-label">Hip</div><img src="/examples/MDVIP-1.0.1/images/bodyregion_highlights/bodyregion--hip.png" /></div>' +
+                                            '<div class="ptlinked--dropdown_filters" id="type-filter">' +
+                                                '<div class="ptlinked--filter_group">' +
+                                                    '<div class="filter-label">View By Type</div>' +
+                                                    '<ul class="filter--item_list">' +                                                        
+                                                    '</ul>' +
+                                                '</div>' +
+                                                '<div class="ptlinked--filter_group" id="condition-filter">' +
+                                                    '<div class="filter-label">View By Condition</div>' +
+                                                    '<select id="filter--condition_type">' +
+                                                        '<option value="0">Select a condition or diagnosis here</option>' +
+                                                    '</select>' +
+                                                    '<div class="clear-condition-filters hide" title="clear condition filter"><svg aria-hidden="true" focusable="false" data-prefix="fal" data-icon="times" class="svg-inline--fa fa-times fa-w-10" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path fill="currentColor" d="M193.94 256L296.5 153.44l21.15-21.15c3.12-3.12 3.12-8.19 0-11.31l-22.63-22.63c-3.12-3.12-8.19-3.12-11.31 0L160 222.06 36.29 98.34c-3.12-3.12-8.19-3.12-11.31 0L2.34 120.97c-3.12 3.12-3.12 8.19 0 11.31L126.06 256 2.34 379.71c-3.12 3.12-3.12 8.19 0 11.31l22.63 22.63c3.12 3.12 8.19 3.12 11.31 0L160 289.94 262.56 392.5l21.15 21.15c3.12 3.12 8.19 3.12 11.31 0l22.63-22.63c3.12-3.12 3.12-8.19 0-11.31L193.94 256z"></path></svg></div>' +
+                                                '</div>' +
+                                            '</div>' +
+                                        '</div>' +
+                                    '</div>' ;
+
+            return __filter_dropdown ;
+        }
+
 
 		function start( ) {
             if( options["debug_mode"] ) { console.log( "----- Rendering User Interface") ; }
@@ -2355,13 +2271,17 @@
             __page_request_values["c"] = 0 ;    // Selected Category
             __page_request_values["c1"] = 0 ;   // Category Type (0='reg' or 1='custom')
             __page_request_values["v"] = "" ;   // Search String
-            __page_request_values["f1"] = 0 ;   // Type Filter
-            __page_request_values["f2"] = 0 ;   // Difficulty Filter
-            __page_request_values["f3"] = 0 ;   // Duration Filter
-            __page_request_values["f4"] = 0 ;   // Condition Filter
-            __page_request_values["f5"] = 0 ;   // Equipment Filter 
+            __page_request_values["f1"] = 0 ;   // Type Filter            
+            __page_request_values["f4"] = 0 ;   // Condition Filter            
             current_index = 0 ; // Current Index Count
-            record_chunks = 25 ; // Total Records to load                                  
+            record_chunks = 25 ; // Total Records to load                 
+            selected_filters =  {
+                                    bodyregion: {},
+                                    type: {},                                    
+                                    condition: {},
+                                    myfavorites: {},
+                                    customcat: {}
+                                };                 
 
             if( options["debug_mode"] ) { console.log( "----- Calculate Plugin Container Height") ; }
             calc_plugin_container_height( ) ; // Calculate Container Height for library
@@ -2385,12 +2305,16 @@
             if( options["debug_mode"] ) { console.log( "----- Loading Filters") ; }
             clearFilters( ) ; // Clear the Filters            
             loadFilters( ) ; // Load Filters
+            loadFilterLookups( ) ;
             
             if( options["debug_mode"] ) { console.log( "----- Requesting Initial Search Results") ; }
             routeQuery( ) ; // Initiate Search
             
             if( options["debug_mode"] ) { console.log( "----- Initialize Scroll Monitor") ; }
             initScrollMonitor( ) ; // Initialize ScrollMonitor
+
+            if( options["debug_mode"] ) { console.log( "----- Initialize Hover Monitor") ; }
+            mouseHoverEventMonitor( ) ;
             
             if( options["debug_mode"] ) { console.log( "----- Process URL Query") ; }
             process_url_query( ) ; // Check page request query string
@@ -2405,8 +2329,8 @@
 		
 		// 6.1 Toggle the mobile filter menu
 		function init_mobile_filter_menu( ) {
-			$("#ptl-mobile_filter_button").unbind( "click" ).on( "click", function(){		
-				if( !$(".mobile-filter-panel").hasClass( "opened" ) ) {
+			$("#mobile-predesigned--filter_link").unbind( "click" ).on( "click", function(){		
+				if( !$(".mobile-filter-panel").hasClass( "opened" ) ) {                    
 					$(".mobile-filter-panel").addClass( "opened" ) ;
 				} else {
 					$(".mobile-filter-panel").removeClass( "opened" )
@@ -2600,6 +2524,15 @@
             var el_viewer_thumb_bar = $("."+options["viewer_thumb_scroller_class"]) ;
             var h_viewer_thumb_bar = Math.round( $(el_viewer_thumb_bar).outerHeight( ) ) ;
             $(".viewer--exercise_container").css( "height", Math.round( h_full_page - ( h_viewer_header + h_viewer_thumb_bar ) ) ) ;
+            $(".viewer--exercise_container").on( "scroll", function(){
+                $("#workout-preview__thumbslider li.exercise-thumb").removeClass( "selected" ) ;
+                $("#workout-preview__thumbslider li.exercise-thumb").each( function(){
+                    var id = $(this).data("wrkitem") ;
+                    if( isScrolledIntoView( id ) ) {
+                        $(this).addClass( "selected" ) ;
+                    }
+                });
+            });
         }
 
         // 6.11 Display a Dialog Box
@@ -2651,6 +2584,122 @@
                 data["confirmation_callbackn"] = confirmation_callback ;
                 hook('onShowDialog', data);
             }
+        }
+
+        // 6.12 Calculate Drop Down Position
+        function calc_dropdown_position( obj ) {                                              
+            if( obj.data( "customcat") > 0 ) {            
+                $(".ptlinked--filter_dropdown").removeClass( "display show" ) ;                    
+                return ;
+            }            
+            var highlight_image = "/examples/MDVIP-1.0.1/images/bodyregion_highlights/" + obj.data( "highlight" ) ;
+            var title_label = obj.data( "title" ) ;
+            var oid = obj.data( "oid" ) ;             
+            $("#selected_bodyregion_id").val( oid ) ;            
+            var __offset_plus_height_sliderbar = $(".scroll-container").offset().top + $(".scroll-container").height() - 12;
+            var __item_offset_x = obj.offset().left ;
+            var viewport_width = $("#ptlinked--application_container").width( ) ;
+            var filter_popup_width = $(".ptlinked--filter_dropdown").width( ) ;
+            var bubble_width = obj.outerWidth() ;            
+            
+            
+            // Set filter Box TOP position
+            $(".ptlinked--filter_dropdown").css( "top", __offset_plus_height_sliderbar ) ;
+                
+            // Update highlight and label
+            $(".ptlinked--dropdown_bodyregion_highlight").find( "img" ).attr( "src", highlight_image ) ;
+            $(".ptlinked--dropdown_bodyregion_highlight").find( ".highlight-label" ).html( title_label ) ;     
+
+            // Show/Hide Types based on body region
+            var arr_types = __bodyregion_info[oid]["types"] ;
+            $("ul.filter--item_list li").each(function(){
+                if( !$(this).hasClass( "hidden" ) ) {
+                    $(this).addClass( "hidden" ) ;
+                }    
+            }) ;
+            $("ul.filter--item_list li").removeClass( "selected" ) ;
+            for( var j = 0 ; j < arr_types.length ; j ++ ) {
+                if( $("ul.filter--item_list").find( "li[data-oid='"+arr_types[j]["type_id"]+"']" ).hasClass( "hidden" ) ) {
+                    $("ul.filter--item_list").find( "li[data-oid='"+arr_types[j]["type_id"]+"']" ).removeClass( "hidden" ) ;
+                }
+            }
+            if( $("ul.filter--item_list").find( "li[data-oid='0']" ).hasClass( "hidden" ) ) {
+                $("ul.filter--item_list").find( "li[data-oid='0']" ).removeClass( "hidden" ) ;
+            }
+            $("ul.filter--item_list li").removeClass( "selected" ) ;
+            $("ul.filter--item_list li[data-oid='"+__page_request_values["f1"]+"']").addClass( "selected" ) ;
+            
+
+            // Show/Hide Conditions based on body region
+            var arr_conditions = __bodyregion_info[oid]["conditions"] ;
+            refreshConditionFilters( arr_conditions ) ;
+            if( __page_request_values["f4"] == 0 ) {
+                if( !$(".clear-condition-filters").hasClass( "hide" ) ) {
+                    $(".clear-condition-filters").addClass( "hide" ) ;
+                }
+                $("#predesigned_filters--conditions").val( 0 ).trigger( "change" ) ;
+            } else if( $("#selected_bodyregion_id").val() != __page_request_values["c"] ) {
+                if( !$(".clear-condition-filters").hasClass( "hide" ) ) {
+                    $(".clear-condition-filters").addClass( "hide" ) ;
+                }
+                $("#predesigned_filters--conditions").val( 0 ).trigger( "change" ) ;
+            } else {
+                if( $(".clear-condition-filters").hasClass( "hide" ) ) {
+                    $(".clear-condition-filters").removeClass( "hide" ) ;
+                }
+                $("#predesigned_filters--conditions").val( __page_request_values["f4"] ).trigger( "change" ) ;
+            }
+
+            // Calculate off page display and adjust orientation
+            if( ( __item_offset_x + filter_popup_width ) > viewport_width ) {                
+                $(".ptlinked--filter_dropdown").css( "left", ( __item_offset_x - filter_popup_width ) + bubble_width ) ;
+                // Right Arrow
+                if( $(".ptlinked--filter_dropdown .arrow").hasClass( "left" ) ) {
+                    $(".ptlinked--filter_dropdown .arrow").removeClass( "left" ).addClass( "right" ) ;
+                }
+                var right_arrow_position = filter_popup_width - ( bubble_width / 2 ) - 10 ;
+                $(".ptlinked--filter_dropdown .arrow").css( "left", right_arrow_position + "px" ) ;
+            } else {                
+                $(".ptlinked--filter_dropdown").css( "left", __item_offset_x ) ;
+                // Left Arrow
+                if( $(".ptlinked--filter_dropdown .arrow").hasClass( "right" ) ) {
+                    $(".ptlinked--filter_dropdown .arrow").removeClass( "right" ).addClass( "left" ) ;
+                }
+                var left_arrow_position = ( bubble_width / 2 ) - 10 ;
+                $(".ptlinked--filter_dropdown .arrow").css( "left", left_arrow_position + "px" ) ;
+            }            
+            $(".ptlinked--filter_dropdown").addClass( "display show" );                
+            //$(".ptlinked--filter_dropdown").addClass( "show" );                    
+        }
+
+        // 6.13 Monitor application mouse cursor and hide filter menu if it's displayed
+        function mouseHoverEventMonitor( ) {            
+            $(document).mousemove(function(){
+                var isIE11 = !!navigator.userAgent.match(/Trident.*rv\:11\./);
+                if($(".ptlinked--filter_dropdown:hover").length != 0 || $(".scroll-container:hover").length != 0 || $(".select2-container:hover").length != 0 ){
+                    
+                } else{                    
+                    if( !isIE11 ) {
+                        if( $(".ptlinked--filter_dropdown").hasClass( "display" ) ) {                        
+                            if( $(".select2-container--open").length != 0 ) {
+                                $("#filter--condition_type").select2( "close" ) ;
+                            }
+                            $(".ptlinked--filter_dropdown").removeClass( "show display" );
+                        }
+                    }
+                }
+            });
+        }
+
+        // 6.14 Is the exercise scrolled into view
+        function isScrolledIntoView( elem_id ) {
+            var containerHeight = $("#viewer--exercise_container_wrapper").height();
+            var elem_position = $(".viewer--exercise_item[data-oid='"+elem_id+"']").offset().top ;
+            if( elem_position < containerHeight && ( elem_position > -170 ) ) {
+                return true ;
+            } else {
+                return false ;
+            }            
         }
 
 
@@ -2770,6 +2819,8 @@
         viewer_header_element_class: 'viewer--header',              // Plugin exercise program viewer header class
         viewer_thumb_scroller_class: 'viewer--header_bar',          // Plugin exercise program viewer thumbnail slider class
         dialog_box_type: 'bootstrap',                               // Dialog plugin/component to use (bootstrap, jQuery)
+        exercise_program_viewer: 'fullscreen',                      // What Exercise Program viewer mode to use (fullscreen, modal)
+        category_slider_style: 'ptlinked',                          // Category slider style (ptlinked || mdvip)
 
 		onInit: function() {},                                      // On plugin initialization callback
 		onDestroy: function() {},                                   // On plugin destroy callback

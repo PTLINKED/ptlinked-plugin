@@ -242,7 +242,7 @@ input[type='text']:-ms-input-placeholder{ display: block; }
 .cards--grid_container_item{ display: -ms-flexbox; display: -webkit-flex; display: flex; flex-direction: column; position: relative; width: 320px; height: 340px; margin: 0 10px 60px 10px; cursor: pointer; animation: fadeInAnimation ease 2s ; animation-iteration-count: 1; animation-fill-mode: forwards; }
 /*.cards--grid_container_item:hover .cards--menu_item{ opacity: 0; }
 .cards--grid_container_item:hover .cards--menu_item:hover{ color: #303030; }*/
-.cards--grid_container_item .cards--menu_item{ position: absolute; top: 5px; right: 5px; cursor: pointer; color: #303030; }
+.cards--grid_container_item .cards--menu_item{ position: absolute; top: -10px; right: -7px; cursor: pointer; color: #c54905; }
 .cards--grid_container_item .cards--menu_item svg{ width: 1.6rem; height: 1.6rem; }
 .cards--grid_placeholder{ cursor: default; }
 @keyframes fadeInAnimation { 
