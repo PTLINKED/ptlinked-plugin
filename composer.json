@@ -1,11 +1,6 @@
 {
-    "repositories": [
-        {
-                "type": "vcs",
-                "url": "https://github.com/ptlinked/ptlinked-plugin"
-        }
-    ],
-    "require": {
-        "ptlinked/ptlinked-plugin": "^1.0"
-    }
+    "name": "ptlinked/ptlinked-plugin",
+    "description": "PTLINKED Exercise program jquery plugin.",
+    "type": "library",
+    "require": {}
 }
