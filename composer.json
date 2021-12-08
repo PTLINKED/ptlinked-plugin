@@ -1,6 +1,25 @@
 {
     "name": "ptlinked/ptlinked-plugin",
-    "description": "PTLINKED Exercise program jquery plugin.",
-    "type": "library",
-    "require": {}
+    "description": "A jQuery plugin to display the PTLINKED exercise program library.",
+    "type": "component",
+    "homepage": "http://www.ptlinked.com",
+    "license": "MIT",    
+    "authors": [
+        {
+            "name": "PTLINKED, LLC.",
+            "url": "https://www.ptlinked.com"
+        }
+    ],
+    "extra": {
+        "component": {
+            "scripts": [
+                "jquery-ptlinked_plugin.js"
+            ],
+            "files": [
+                "jquery-ptlinked_plugin.min.js",
+                "ptlinked_plugin.css",
+                "ptlinked_plugin.min.css"
+            ]
+        }
+    }
 }
