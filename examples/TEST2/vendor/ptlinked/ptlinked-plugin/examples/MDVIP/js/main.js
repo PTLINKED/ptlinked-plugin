@@ -3,18 +3,16 @@ var ptlinked_app = null ;
 $(document).ready( function(){
 	
 	ptlinked_app = $("#ptlinked--application_container").ptlinkedLibrary({
-		api_key: '24a44cd0db05673a1965cea32662be92',//'3D3E90AFFC9D47B5C161E6F6750D459D',//'e7ae8a7a7be9491c063674a79a657de9',
+		api_key: 'e7ae8a7a7be9491c063674a79a657de9',
 		api_root_url: 'https://api-mdvip.ptlinked.com',
-		app_root_url: 'https://mdvip-plugin.ptlinked.com/examples/MDVIP-1.0.1',		
+		app_root_url: 'https://mdvip-plugin.ptlinked.com/examples/MDVIP',		
 		save_favorites: true,
 		secure_messaging: true,		
 		training_mode: false,
 		debug_mode: true,
-		category_slider_style: 'mdvip', // ptlinked || mdvip
-		exercise_program_viewer: 'modal', // fullscreen || modal
 		video_bg: 'white',		
 		user_type: 'physician',
-		user_uid: '00544000008eQ06AAE',				
+		user_uid: 'mdvip-phy001',				
         header_element_class: 'site-header',
         viewer_header_element_class: 'viewer--header',
         viewer_thumb_scroller_class: 'viewer--header_bar',
