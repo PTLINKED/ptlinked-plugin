@@ -2192,7 +2192,7 @@
                             if( !options["training_mode"] && options["save_favorites"] ) {
                                 results_container_html += '<span class="metadata-block text-right margin-left-20 is-clickable btn-save_program"><i class="fa fa-save"></i>Save</span>' ;
                             }
-                            if( !options["training_mode"] && options["secure_messaging"] && ( options["user_type"] == "physician" || options["user_type"] == "staff" ) ) {
+                            if( !options["training_mode"] && options["secure_messaging"] && ( options["user_type"] == "physician" || options["user_type"] == "staff" )  ) {
                               results_container_html += '<span class="metadata-block text-right margin-left-20 is-clickable btn-share_program"><i class="fa fa-share-square"></i>Send</span>' ;
                             }
             results_container_html += '</div>' +
@@ -2219,9 +2219,9 @@
                 '<div id="viewer--header" class="viewer--header_bar">' +
                     '<div id="viewer--filmstrip" class="viewer--filmstrip_container">' +
                         '<div class="workout-preview__filmstrip">' +
-                            '<div class="left-arrow"><i class="far fa-chevron-left"></i></div>' +
+                            '<div class="left-arrow"><i class="fa fa-chevron-left"></i></div>' +
                             '<ul class="workout-preview__thumbs" id="workout-preview__thumbslider"></ul>' +
-                            '<div class="right-arrow"><i class="far fa-chevron-right"></i></div>' +
+                            '<div class="right-arrow"><i class="fa fa-chevron-right"></i></div>' +
                         '</div>' +
                     '</div>' +
                 '</div>' +
@@ -2553,11 +2553,12 @@
             if( !el_viewer_header.length ) {
                 // Header element does not exist - do something
             }
-            //var h_full_page = Math.round( $("body").outerHeight( ) ) ;
-            var h_full_page = 955; //Math.round( $(".ptlinked--exercise_program_viewer.mdvip-modal").outerHeight() ) ;
+            //var h_full_page = Math.round( $(".ptlinked--exercise_program_viewer.mdvip-modal").outerHeight( ) ) ;            
+            var h_full_page = Math.round( $(window).height() ) ;            
+            //var h_full_page = 955; //Math.round( $(".ptlinked--exercise_program_viewer.mdvip-modal").outerHeight() ) ;
             var h_viewer_header = Math.round( $(el_viewer_header).outerHeight( ) ) ;
             var el_viewer_thumb_bar = $("."+options["viewer_thumb_scroller_class"]) ;
-            var h_viewer_thumb_bar = Math.round( $(el_viewer_thumb_bar).outerHeight( ) ) ;
+            var h_viewer_thumb_bar = Math.round( $(el_viewer_thumb_bar).outerHeight( ) ) ;            
             if( options["debug_mode"] ) { console.log( "----- Calculated Viewer Container Height: " + h_full_page + " - ( " + h_viewer_header + " + " + h_viewer_thumb_bar + " )" ) ; }
             $(".viewer--exercise_container").css( "height", Math.round( h_full_page - ( h_viewer_header + h_viewer_thumb_bar ) ) ) ;
             $(".viewer--exercise_container").on( "scroll", function(){
