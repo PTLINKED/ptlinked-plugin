@@ -1,7 +1,7 @@
  /**
  * PTLINKED Plugin - Exercise Program Library
  * Customer: MDVIP
- * Version: 1.0.2
+ * Version: 1.0.7
  * Author: Mike Frank (PTLINKED, LLC.) - mfrank@ptlinked.com
  * 
  * Table of Contents
@@ -1319,6 +1319,8 @@
                     __page_request_values["v"] = $.trim( inp.val( ) ) ;                    
                     if( __page_request_values["v"] == "" ) {
                         inp.val( "" ) ;
+                        current_index = 0 ;
+                        routeQuery( ) ;
                         if( h_search_bar_clear.hasClass( "active" ) ) {
                             h_search_bar_clear.removeClass( "active" ) ;
                         }
@@ -1337,6 +1339,8 @@
                     __page_request_values["v"] = $.trim( m_inp.val( ) ) ;
                     if( __page_request_values["v"] == "" ) {
                         m_inp.val( "" ) ;
+                        current_index = 0 ;
+                        routeQuery( ) ;
                         if( mh_search_bar_clear.hasClass( "active" ) ) {
                             mh_search_bar_clear.removeClass( "active" ) ;
                         }
@@ -2060,7 +2064,7 @@
                     //    '</button>' +
                     //'</div>' +                                      
                     '<input label="search" type="text" class="form-control search-input__search-container" id="mheader-search" placeholder="Find an exercise program">' +
-                    //'<div class="mheader-search-bar-clear" title="Clear search">X</div>' +
+                    '<div class="mheader-search-bar-clear" title="Clear search">X</div>' +
                     '<div class="input-group-append">' +
                         '<button class="btn btn-secondary search-input__search-button" id="ptl-mobile_search_button" type="button">' +
                             '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" class="icon icon--search">' +

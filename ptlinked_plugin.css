@@ -215,7 +215,7 @@ body, html, #page-container{ height: 100%; }*/
 .mobile-filter--clear.active{ display: block; cursor: pointer; color: #c54905; }
 .mobile--grid_filter_clear{ font-size: 2rem; visibility: hidden; flex-grow: 3; line-height: 5.8rem; margin-left: 2rem;  }
 .mobile--grid_filter_clear.active{ visibility: visible; color: #c54905; cursor: pointer; }
-.mobile-filter-panel{ position: absolute; top: 0rem; bottom: 0rem; left: 0rem; right: 0rem; width: 100%; height: 100%; background-color: #fff; display: none; z-index: 55; }
+.mobile-filter-panel{ position: absolute; top: 0rem; bottom: 0rem; left: 0rem; right: 0rem; width: 100%; height: 100%; min-height: 820px; background-color: #fff; display: none; z-index: 55; }
 ul.mobile-filter-panel_list{ list-style: none; padding: 0; margin: 0; padding: 0 5rem; }
 ul.mobile-filter-panel_list li{ width: 100%; display: block; height: 70px; line-height: 50px; padding: 10px; font-size: 2.8rem; color: #717171; cursor: pointer; }
 ul.mobile-filter-panel_list li.hide{ display: none; }
