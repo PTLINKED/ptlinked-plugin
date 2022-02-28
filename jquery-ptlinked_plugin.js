@@ -1,7 +1,7 @@
  /**
  * PTLINKED Plugin - Exercise Program Library
  * Customer: MDVIP
- * Version: 1.0.7
+ * Version: 1.0.8
  * Author: Mike Frank (PTLINKED, LLC.) - mfrank@ptlinked.com
  * 
  * Table of Contents
@@ -1964,6 +1964,7 @@
 
         function print_program( ) {
             var url = options["api_root_url"] + "/exerciseprogram/print_program" ;
+            var windowReference = window.open( "about:blank", "_PDF_VIEWER" ) ;
             var parameters = fetch_parameters( ) ;
             $.ajax({
                 type: "POST",
@@ -1986,7 +1987,7 @@
                 },
                 success: function( data, textStatus, jqXHR ) {                      
                     var status = jqXHR["status"] ;
-                    window.open( data, "_blank" ) ;
+                    windowReference.location = data ;
                 }        
             });   
         }
