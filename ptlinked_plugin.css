@@ -1,7 +1,7 @@
 /**
 	PTLINKED Plugin Styles
 	Customer: MDVIP
-	Version: 1.0.1
+	Version: 1.0.9
 	Author: Mike Frank (PTLINKED LLC) - mfrank@ptlinked.com
 
 	Table of Contents
@@ -65,7 +65,7 @@ body, html, #page-container{ height: 100%; }*/
 /* 1.2 Dialog Box */
 .ui-dialog{ min-width: 450px; }
 .ui-widget-header{ background-color: #c54905; color: #fff; }
-.ui-dialog .ui-dialog-titlebar-close{  }
+.ui-dialog .ui-dialog-titlebar-close{ display: none; }
 .ui-dialog .ui-dialog-buttonpane button{ text-transform: uppercase; -webkit-transition: background-color 200ms ease-in-out, border-color 200ms ease-in-out, color 200ms ease-in-out; -o-transition: background-color 200ms ease-in-out, border-color 200ms ease-in-out, color 200ms ease-in-out; transition: background-color 200ms ease-in-out, border-color 200ms ease-in-out, color 200ms ease-in-out; background-color: #fff; border-color: #c54905; color: #c54905; } 
 @media( max-width: 414px ) {
 	.ui-dialog{ min-width: 100%; }

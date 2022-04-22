@@ -1,7 +1,7 @@
  /**
  * PTLINKED Plugin - Exercise Program Library
  * Customer: MDVIP
- * Version: 1.0.8
+ * Version: 1.0.9
  * Author: Mike Frank (PTLINKED, LLC.) - mfrank@ptlinked.com
  * 
  * Table of Contents
@@ -65,21 +65,21 @@
 
 ;(function($) {
 
-  	var pluginName = 'ptlinkedLibrary';
+    var pluginName = 'ptlinkedLibrary';
  
     /**
     * Plugin object constructor.
     * Implements the Revealing Module Pattern.
     */
-	function Plugin(element, options) {
-		// References to DOM and jQuery versions of element.
-		var el = element;
-		var $el = $(element);
+    function Plugin(element, options) {
+        // References to DOM and jQuery versions of element.
+        var el = element;
+        var $el = $(element);
 
-		// Extend default options with those supplied by user.
-		options = $.extend({}, $.fn[pluginName].defaults, options);
+        // Extend default options with those supplied by user.
+        options = $.extend({}, $.fn[pluginName].defaults, options);
 
-		var selected_category_filter = 0 ;     // Selected category Filter
+        var selected_category_filter = 0 ;     // Selected category Filter
         var selected_filters = {} ;            // Selected Filters
         var __filter_timer ;                   // Filter timer variable
         var __filter_delay = 500 ;             // The set delay before the filter menu is displayed
@@ -97,15 +97,15 @@
         var __exercise_program_code = '' ;     // Currently selected exercise program code to display in viewer
         var __error_detected = false ;
         var __bodyregion_info = {} ;
-		
+        
 
 
 // **********************************************************************************
 // 1.0 CATEGORY SLIDER METHODS
-// **********************************************************************************		
+// **********************************************************************************       
 
-		// 1.1 Load Category Items in Sliderbar / Mobile Menu
-		function loadCategories( ) {			
+        // 1.1 Load Category Items in Sliderbar / Mobile Menu
+        function loadCategories( ) {            
             var url = options["api_root_url"] + "/predesigned/bodyregions/html" ; 
             var s = getBootstrapDeviceSize( );
             if( s ) {
@@ -154,7 +154,16 @@
                             var cur_c1 = __page_request_values["c1"] ;
                             var cur_f1 = __page_request_values["f1"] ;                            
                             var cur_f4 = __page_request_values["f4"] ;       
-                            if( cur_c != oid || cur_c1 != custom_cat ) {     
+                            if( cur_c != oid || cur_c1 != custom_cat ) {                                     
+                                var arr_types = __bodyregion_info[oid]["types"] ;                                
+                                $("#predesigned_filters--types-mobile").html( "" ) ;
+                                $("#predesigned_filters--types-mobile").html( '<option selected="" value="0">Type</option>' ) ;
+                                for( var i = 0 ; i < arr_types.length ; i ++ ) {
+                                    var tmp = '<option data-oid="'+arr_types[i]["type_id"]+'" data-filter_label="'+arr_types[i]["title"]+'" data-filter_type="type" value="'+arr_types[i]["type_id"]+'">'+arr_types[i]["title"]+'</option>' ;
+                                    $("#predesigned_filters--types-mobile").append( tmp ) ;
+                                }
+                                $("#predesigned_filters--types-mobile").select2( ) ;
+
                                 if( oid == 0 ) { filter_breadcrumb( cur_c, '', 'bodyregion', 'remove' ) ; }                             
                                 setPageRequestValue( "c", oid ) ;
                                 setPageRequestValue( "c1", custom_cat ) ;
@@ -184,7 +193,9 @@
                                         filter_breadcrumb( __page_request_values["f1"], "", "type", 'remove' ) ;
                                         if( cur_f1 > 0 ) { setPageRequestValue( "f1", 0 ) ; }
                                         $("#predesigned_filters--types-mobile").val( 0 ).trigger( "change" ) ;                                        
-                                    }                        
+                                    } else {
+                                        $("#predesigned_filters--types-mobile").val( __page_request_values["f1"] ).trigger( "change" ) ;
+                                    }                       
                                     $("#predesigned_filters--conditions").val( 0 ).trigger( "change" ) ;
                                     __page_request_values["f4"] = 0 ;                                    
                                     // Update highlight and label
@@ -221,11 +232,11 @@
                     }
                 }        
             });
-		}
+        }
 
-		// 1.2 Render Category Items
-		function renderCategories( html ) {
-			var category_filter_container = $("ul.category-bubbles-list") ;            
+        // 1.2 Render Category Items
+        function renderCategories( html ) {
+            var category_filter_container = $("ul.category-bubbles-list") ;            
             $.each( html, function( index, value ) {
                 category_filter_container.append( value ) ;
             });
@@ -253,8 +264,8 @@
                 var cur_c1 = __page_request_values["c1"] ;
                 var cur_f1 = __page_request_values["f1"] ;                
                 var cur_f4 = __page_request_values["f4"] ;                                            
-            	if( cur_c != oid || cur_c1 != custom_cat ) {
-            		setPageRequestValue( "c", oid ) ;
+                if( cur_c != oid || cur_c1 != custom_cat ) {
+                    setPageRequestValue( "c", oid ) ;
                     setPageRequestValue( "c1", custom_cat ) ;
                     if( custom_cat > 0 ) {
                         filter_breadcrumb( __page_request_values["f4"], "", "condition", 'remove' ) ;                        
@@ -266,7 +277,7 @@
                         $("#predesigned_filters--types li").removeClass( "selected" ) ;                        
                     } else {
                         filter_breadcrumb( __page_request_values["f4"], "", "condition", 'remove' ) ;
-                		if( cur_f4 > 0 ) { setPageRequestValue( "f4", 0 ) ; }                		                	                        
+                        if( cur_f4 > 0 ) { setPageRequestValue( "f4", 0 ) ; }                                                                   
                         var __item_found = false ;
                         __bodyregion_info[oid]["types"].forEach( function(item, index, arr){
                             if( item["type_id"] == cur_f1 ) {
@@ -289,24 +300,24 @@
                     requestPrograms( ) ;
                     $("ul.category-bubbles-list li").removeClass( "active-filter" ) ;
                     $(this).addClass( "active-filter" ) ;
-            	}
+                }
             });
-		}
+        }
 
-		// 1.3 Set a Page Request Value
-		function setPageRequestValue( key,value ) {
-			__page_request_values[key] = value ;
-		}
+        // 1.3 Set a Page Request Value
+        function setPageRequestValue( key,value ) {
+            __page_request_values[key] = value ;
+        }
 
-		// 1.4 Clear Category Slider Html
-		function clearCategories( ) {
-			$("ul.category-bubbles-list").html( "" ) ;
-		}
+        // 1.4 Clear Category Slider Html
+        function clearCategories( ) {
+            $("ul.category-bubbles-list").html( "" ) ;
+        }
 
-		// 1.5 Initialize Category Slider Mechanics
-		function initCategoryScrollMechanics( ) {
+        // 1.5 Initialize Category Slider Mechanics
+        function initCategoryScrollMechanics( ) {
             var _root = $(".scroll-container") ;
-			var scrollIncrement = 400 ;
+            var scrollIncrement = 400 ;
             var scrollContainer = $(_root).find( "ul.category-bubbles-list" ) ;
             var leftScrollArrow = $(".scroll-container").find( ".left-arrow" ) ;
             var rightScrollArrow = $(".scroll-container").find( ".right-arrow" ) ;
@@ -363,7 +374,7 @@
                     }
                 });
             });
-		}
+        }
 
 // **********************************************************************************
 // 2.0 FILTER DROP DOWN METHODS
@@ -470,35 +481,35 @@
 
         // 2.5 Clear all filters and search click handler
         function clearAllSearchState( e ) {
-        	predesigned_controller.clear_category_filters( ) ;
-			predesigned_controller.clear_filters( ) ;
-			predesigned_controller.load_body_regions( ) ;	
-			predesigned_controller.load_filters( ) ;	
-			$("#header-search").val( "" ) ;
-			$("#mheader-search").val( "" ) ;
-			if( $(".header-search-bar-clear").hasClass( "active" ) ) {
-				$(".header-search-bar-clear").removeClass( "active" ) ;
-			}
-			if( $(".card--grid_filter_clear").hasClass( "active" ) ) {
-				$(".card--grid_filter_clear").removeClass( "active" ) ;
-			}
-			if( $(".ptl-mobile_search_button").hasClass( "active" ) ) {
-				$(".ptl-mobile_search_button").removeClass( "active" ) ;
-			}
-			if( $(".mheader-search-bar-clear").hasClass( "active" ) ) {
-				$(".mheader-search-bar-clear").removeClass( "active" ) ;
-			}
-			$(".card--grid_filter_clear").unbind( "click" ) ;
-			// Reset all page request flags
-			__page_request_values["c"] = 0 ;	// Selected Category
+            predesigned_controller.clear_category_filters( ) ;
+            predesigned_controller.clear_filters( ) ;
+            predesigned_controller.load_body_regions( ) ;   
+            predesigned_controller.load_filters( ) ;    
+            $("#header-search").val( "" ) ;
+            $("#mheader-search").val( "" ) ;
+            if( $(".header-search-bar-clear").hasClass( "active" ) ) {
+                $(".header-search-bar-clear").removeClass( "active" ) ;
+            }
+            if( $(".card--grid_filter_clear").hasClass( "active" ) ) {
+                $(".card--grid_filter_clear").removeClass( "active" ) ;
+            }
+            if( $(".ptl-mobile_search_button").hasClass( "active" ) ) {
+                $(".ptl-mobile_search_button").removeClass( "active" ) ;
+            }
+            if( $(".mheader-search-bar-clear").hasClass( "active" ) ) {
+                $(".mheader-search-bar-clear").removeClass( "active" ) ;
+            }
+            $(".card--grid_filter_clear").unbind( "click" ) ;
+            // Reset all page request flags
+            __page_request_values["c"] = 0 ;    // Selected Category
             __page_request_values["c1"] = 0 ;   // Is custom category 
-			__page_request_values["v"] = "" ;	// Search String
-			__page_request_values["f1"] = 0 ;	// Type Filter			
-			__page_request_values["f4"] = 0 ;	// Condition Filter			            
-			//Cookies.remove('ptlinkedQueryState');
-			Cookies.remove('ptlinkedQueryState', { path: '/', domain: '.ptlinked.com', secure: true } ) ;
-			setFilters( ) ;
-			routeQuery( ) ;	
+            __page_request_values["v"] = "" ;   // Search String
+            __page_request_values["f1"] = 0 ;   // Type Filter          
+            __page_request_values["f4"] = 0 ;   // Condition Filter                     
+            //Cookies.remove('ptlinkedQueryState');
+            Cookies.remove('ptlinkedQueryState', { path: '/', domain: '.ptlinked.com', secure: true } ) ;
+            setFilters( ) ;
+            routeQuery( ) ; 
         }
 
         // 2.6 Clear Filter Click Handler
@@ -1091,6 +1102,14 @@
                         $("#predesigned_filters--types-mobile").parent().parent().find( ".mobile-filter--clear" ).addClass( "active" ) ;
                     }
                 } else {
+                    var arr_types = __bodyregion_info[0]["types"] ;                                
+                    $("#predesigned_filters--types-mobile").html( "" ) ;
+                    $("#predesigned_filters--types-mobile").html( '<option selected="" value="0">Type</option>' ) ;
+                    for( var i = 0 ; i < arr_types.length ; i ++ ) {
+                        var tmp = '<option data-oid="'+arr_types[i]["type_id"]+'" data-filter_label="'+arr_types[i]["title"]+'" data-filter_type="type" value="'+arr_types[i]["type_id"]+'">'+arr_types[i]["title"]+'</option>' ;
+                        $("#predesigned_filters--types-mobile").append( tmp ) ;
+                    }
+                    $("#predesigned_filters--types-mobile").select2( ) ;
                     if( $("#predesigned_filters--types-mobile").parent().parent().find( ".mobile-filter--clear" ).hasClass( "active" ) ) {
                         $("#predesigned_filters--types-mobile").parent().parent().find( ".mobile-filter--clear" ).removeClass( "active" ) ;
                     }
@@ -1145,6 +1164,14 @@
                 $("#predesigned_filters--types li").removeClass( "active-filter" ) ;                
                 
                 $("#predesigned_filters--types-mobile").val( 0 ).trigger( "change" ) ;
+                var arr_types = __bodyregion_info[0]["types"] ;                                
+                $("#predesigned_filters--types-mobile").html( "" ) ;
+                $("#predesigned_filters--types-mobile").html( '<option selected="" value="0">Type</option>' ) ;
+                for( var i = 0 ; i < arr_types.length ; i ++ ) {
+                    var tmp = '<option data-oid="'+arr_types[i]["type_id"]+'" data-filter_label="'+arr_types[i]["title"]+'" data-filter_type="type" value="'+arr_types[i]["type_id"]+'">'+arr_types[i]["title"]+'</option>' ;
+                    $("#predesigned_filters--types-mobile").append( tmp ) ;
+                }
+                $("#predesigned_filters--types-mobile").select2( ) ;
                 if( $("#predesigned_filters--types-mobile").parent().parent().find( ".mobile-filter--clear" ).hasClass( "active" ) ) {
                     $("#predesigned_filters--types-mobile").parent().parent().find( ".mobile-filter--clear" ).removeClass( "active" ) ;
                 }
@@ -1315,7 +1342,7 @@
             m_inp.val( "" ) ;
 
             inp.unbind( "keypress").on( "keypress", function(e){                
-                if( e.keyCode == 13 ) {                	                    
+                if( e.keyCode == 13 ) {                                     
                     __page_request_values["v"] = $.trim( inp.val( ) ) ;                    
                     if( __page_request_values["v"] == "" ) {
                         inp.val( "" ) ;
@@ -1613,7 +1640,7 @@
         }
 
         /* 3.6 Process the Load More */
-        function processLoadMore( num_ret_records, num_total_records ) {        	
+        function processLoadMore( num_ret_records, num_total_records ) {            
             var _current_index = current_index ;
             var current_rec_return = record_chunks ;
             var num_records_rendered = _current_index + current_rec_return ;                    
@@ -2300,7 +2327,7 @@
             return __filter_dropdown ;
         }
 
-		function start( ) {
+        function start( ) {
             if( options["debug_mode"] ) { console.log( "----- Rendering User Interface") ; }
             render( ) ; // Render Interface
             
@@ -2308,9 +2335,9 @@
             registerUser( ) ;  
         }
 
-		// Initialize plugin.		
-		function init() {
-			if( options["debug_mode"] ) { console.log( "::::: Plugin Initialization :::::") ; }
+        // Initialize plugin.       
+        function init() {
+            if( options["debug_mode"] ) { console.log( "::::: Plugin Initialization :::::") ; }
             // Reset all page request flags
             __page_request_values["c"] = 0 ;    // Selected Category
             __page_request_values["c1"] = 0 ;   // Category Type (0='reg' or 1='custom')
@@ -2364,30 +2391,30 @@
             process_url_query( ) ; // Check page request query string
 
             if( options["debug_mode"] ) { console.log( "----- Trigger OnInit Callback") ; }
-			hook('onInit');
-		}
+            hook('onInit');
+        }
 
 // **********************************************************************************
 // 6.0 UTILITY METHODS
 // **********************************************************************************
-		
-		// 6.1 Toggle the mobile filter menu
-		function init_mobile_filter_menu( ) {
-			$("#mobile-predesigned--filter_link").unbind( "click" ).on( "click", function(){		
-				if( !$(".mobile-filter-panel").hasClass( "opened" ) ) {                    
-					$(".mobile-filter-panel").addClass( "opened" ) ;
-				} else {
-					$(".mobile-filter-panel").removeClass( "opened" )
-				}
-			});	
+        
+        // 6.1 Toggle the mobile filter menu
+        function init_mobile_filter_menu( ) {
+            $("#mobile-predesigned--filter_link").unbind( "click" ).on( "click", function(){                
+                if( !$(".mobile-filter-panel").hasClass( "opened" ) ) {                    
+                    $(".mobile-filter-panel").addClass( "opened" ) ;
+                } else {
+                    $(".mobile-filter-panel").removeClass( "opened" )
+                }
+            }); 
 
-			$("#mbtn-close_filter_menu").unbind( "click" ).on( "click", function(){
-				if( $(".mobile-filter-panel").hasClass( "opened" ) ) {
-					$(".mobile-filter-panel").removeClass( "opened" ) ;
-				}
-			});
-		}
-		        
+            $("#mbtn-close_filter_menu").unbind( "click" ).on( "click", function(){
+                if( $(".mobile-filter-panel").hasClass( "opened" ) ) {
+                    $(".mobile-filter-panel").removeClass( "opened" ) ;
+                }
+            });
+        }
+                
         // 6.2 Calculate the Exercise Program Card Placeholders
         function calculateCardPlaceholders( ) {
             var card_width = $(".cards--grid_container_item").width() + 10 + 10 ;
@@ -2407,30 +2434,30 @@
 
         // 6.3 Toggle the info box
         function toggle_info_box( info_box_id, err_code ) {            
-			if( info_box_id == "predesigned--results_display" ) {
-				if( $(".info-box-item").hasClass( "active" ) ) {
-					$(".info-box-item").removeClass( "active" ) ;
-				}
-				if( $("#predesigned--results_display").hasClass( "display_info_box" ) ) {
-					$("#predesigned--results_display").removeClass( "display_info_box" ) ;
-				}            
-			} else {                        
+            if( info_box_id == "predesigned--results_display" ) {
+                if( $(".info-box-item").hasClass( "active" ) ) {
+                    $(".info-box-item").removeClass( "active" ) ;
+                }
+                if( $("#predesigned--results_display").hasClass( "display_info_box" ) ) {
+                    $("#predesigned--results_display").removeClass( "display_info_box" ) ;
+                }            
+            } else {                        
                 if( info_box_id == "predesigned--sys_error" ) {
                     $(".info-box-item").find( "p.error-number" ).html( "#" + err_code ) ;
                     // Disable Category, Filter/search elements
                     $el.find( ".scroll-container").hide( ) ;
                     $el.find( "#grid-filter" ).hide( ) ;
                 }
-				if( !$("#predesigned--results_display").hasClass( "display_info_box" ) ) {
-					$("#predesigned--results_display").addClass( "display_info_box" ) ;
-				}
-				if( $(".info-box-item").hasClass( "active" ) ) {
-					$(".info-box-item").removeClass( "active" ) ;
-				}                
-				$("#" + info_box_id ).addClass( "active" ) ;
-				$("#load-more-records").hide( ) ;
-			}
-		}
+                if( !$("#predesigned--results_display").hasClass( "display_info_box" ) ) {
+                    $("#predesigned--results_display").addClass( "display_info_box" ) ;
+                }
+                if( $(".info-box-item").hasClass( "active" ) ) {
+                    $(".info-box-item").removeClass( "active" ) ;
+                }                
+                $("#" + info_box_id ).addClass( "active" ) ;
+                $("#load-more-records").hide( ) ;
+            }
+        }
 
         // 6.4 Initialize the content scroll monitor
         function initScrollMonitor( ) {
@@ -2745,108 +2772,108 @@
         }
 
 
-		/**
-		* Get/set a plugin option.
-		* Get usage: $('#el').demoplugin('option', 'key');
-		* Set usage: $('#el').demoplugin('option', 'key', value);
-		*/
-		function option (key, val) {
-			if (val) {
-				options[key] = val;
-			} else {
-				return options[key];
-			}
-		}
+        /**
+        * Get/set a plugin option.
+        * Get usage: $('#el').demoplugin('option', 'key');
+        * Set usage: $('#el').demoplugin('option', 'key', value);
+        */
+        function option (key, val) {
+            if (val) {
+                options[key] = val;
+            } else {
+                return options[key];
+            }
+        }
 
-		/**
-		* Destroy plugin.
-		* Usage: $('#el').demoplugin('destroy');
-		*/
-		function destroy() {
-			// Iterate over each matching element.
-			$el.each(function() {
-				var el = this;
-				var $el = $(this);
+        /**
+        * Destroy plugin.
+        * Usage: $('#el').demoplugin('destroy');
+        */
+        function destroy() {
+            // Iterate over each matching element.
+            $el.each(function() {
+                var el = this;
+                var $el = $(this);
 
-				// Add code to restore the element to its original state...
+                // Add code to restore the element to its original state...
 
-				hook('onDestroy');
-				// Remove Plugin instance from the element.
-				$el.removeData('plugin_' + pluginName);
-			});
-		}
+                hook('onDestroy');
+                // Remove Plugin instance from the element.
+                $el.removeData('plugin_' + pluginName);
+            });
+        }
 
-		/**
-		* Callback hooks.
-		* Usage: In the defaults object specify a callback function:
-		* hookName: function() {}
-		* Then somewhere in the plugin trigger the callback:
-		* hook('hookName');
-		*/
-		function hook(hookName, params) {
-			if (options[hookName] !== undefined) {
-				// Call the user defined function.
-				// Scope is set to the jQuery element we are operating on.                
-				options[hookName].call(el, params);
-			}
-		}
+        /**
+        * Callback hooks.
+        * Usage: In the defaults object specify a callback function:
+        * hookName: function() {}
+        * Then somewhere in the plugin trigger the callback:
+        * hook('hookName');
+        */
+        function hook(hookName, params) {
+            if (options[hookName] !== undefined) {
+                // Call the user defined function.
+                // Scope is set to the jQuery element we are operating on.                
+                options[hookName].call(el, params);
+            }
+        }
 
-		// Initialize the plugin instance.
-		start();
+        // Initialize the plugin instance.
+        start();
 
-		// Expose methods of Plugin we wish to be public.
-		return {
-			option: option,            
-			destroy: destroy
-		};
-	}
+        // Expose methods of Plugin we wish to be public.
+        return {
+            option: option,            
+            destroy: destroy
+        };
+    }
 
-	/**
-	* Plugin definition.
-	*/
-	$.fn[pluginName] = function(options) {
-		// If the first parameter is a string, treat this as a call to a public method.
-		if (typeof arguments[0] === 'string') {
-			var methodName = arguments[0];
-			var args = Array.prototype.slice.call(arguments, 1);
-			var returnVal;
-			this.each(function() {
-				// Check that the element has a plugin instance, and that the requested public method exists.
-				if ($.data(this, 'plugin_' + pluginName) && typeof $.data(this, 'plugin_' + pluginName)[methodName] === 'function') {
-				// Call the method of the Plugin instance, and Pass it the supplied arguments.
-					returnVal = $.data(this, 'plugin_' + pluginName)[methodName].apply(this, args);
-				} else {
-					throw new Error('Method ' +  methodName + ' does not exist on jQuery.' + pluginName);
-				}
-			});
+    /**
+    * Plugin definition.
+    */
+    $.fn[pluginName] = function(options) {
+        // If the first parameter is a string, treat this as a call to a public method.
+        if (typeof arguments[0] === 'string') {
+            var methodName = arguments[0];
+            var args = Array.prototype.slice.call(arguments, 1);
+            var returnVal;
+            this.each(function() {
+                // Check that the element has a plugin instance, and that the requested public method exists.
+                if ($.data(this, 'plugin_' + pluginName) && typeof $.data(this, 'plugin_' + pluginName)[methodName] === 'function') {
+                // Call the method of the Plugin instance, and Pass it the supplied arguments.
+                    returnVal = $.data(this, 'plugin_' + pluginName)[methodName].apply(this, args);
+                } else {
+                    throw new Error('Method ' +  methodName + ' does not exist on jQuery.' + pluginName);
+                }
+            });
 
-			if (returnVal !== undefined){
-				// If the method returned a value, return the value.
-				return returnVal;
-			} else {
-				// Otherwise, returning 'this' preserves chainability.
-				return this;
-			}
-			
-		// If the first parameter is an object (options), or was omitted,
-		// instantiate a new instance of the plugin.
-		} else if (typeof options === "object" || !options) {
-			return this.each(function() {
-				// Only allow the plugin to be instantiated once.
-				if (!$.data(this, 'plugin_' + pluginName)) {
-					// Pass options to Plugin constructor, and store Plugin
-					// instance in the elements jQuery data object.
-					$.data(this, 'plugin_' + pluginName, new Plugin(this, options));
-				}
-			});
-		}
-	};
+            if (returnVal !== undefined){
+                // If the method returned a value, return the value.
+                return returnVal;
+            } else {
+                // Otherwise, returning 'this' preserves chainability.
+                return this;
+            }
+            
+        // If the first parameter is an object (options), or was omitted,
+        // instantiate a new instance of the plugin.
+        } else if (typeof options === "object" || !options) {
+            return this.each(function() {
+                // Only allow the plugin to be instantiated once.
+                if (!$.data(this, 'plugin_' + pluginName)) {
+                    // Pass options to Plugin constructor, and store Plugin
+                    // instance in the elements jQuery data object.
+                    $.data(this, 'plugin_' + pluginName, new Plugin(this, options));
+                }
+            });
+        }
+    };
 
-	// Default plugin options.
-	// Options can be overwritten when initializing plugin, by
-	// passing an object literal, or after initialization:
-	// $('#el').demoplugin('option', 'key', value);
-	$.fn[pluginName].defaults = {
+    // Default plugin options.
+    // Options can be overwritten when initializing plugin, by
+    // passing an object literal, or after initialization:
+    // $('#el').demoplugin('option', 'key', value);
+    $.fn[pluginName].defaults = {
         user_uid: 0,                                                // Unique User Identifier
         user_type: 'physician',                                     // User Tyle (physician, patient, support, etc.)
         secure_messaging: false,                                    // Toggle Send Exercise Program via SecureMessaging
@@ -2865,14 +2892,14 @@
         exercise_program_viewer: 'modal',                      // What Exercise Program viewer mode to use (fullscreen, modal)
         category_slider_style: 'mdvip',                          // Category slider style (ptlinked || mdvip)
 
-		onInit: function() {},                                      // On plugin initialization callback
-		onDestroy: function() {},                                   // On plugin destroy callback
+        onInit: function() {},                                      // On plugin initialization callback
+        onDestroy: function() {},                                   // On plugin destroy callback
         onSendProgram: function(data) {},                           // On Send Exercise Program callback
         onSaveProgram: function(data) {},                           // On Save Exercise Program callback
         onPrintProgram: function(data) {},                          // On Print Exercise Program callback
         onShowDialog: function(data) {},                            // Triggered when a dialog box needs to be displayed
         onViewExerciseProgram: function(data) {}                    // Triggered when a user clicks on an exercise program to view it
 
-	};
-	
+    };
+    
 })(jQuery);
