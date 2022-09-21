@@ -2225,7 +2225,7 @@
                                 results_container_html += '<span class="metadata-block text-right margin-left-20 is-clickable btn-save_program"><i class="fa fa-save"></i>Save</span>' ;
                             }
                             if( !options["training_mode"] && options["secure_messaging"] && ( options["user_type"] == "physician" || options["user_type"] == "staff" )  ) {
-                              results_container_html += '<span class="metadata-block text-right margin-left-20 is-clickable btn-share_program"><i class="fa fa-share-square"></i>Send</span>' ;
+                              results_container_html += '<span class="metadata-block text-right margin-left-20 is-clickable btn-share_program"><i class="fa fa-share-square-o"></i>Send</span>' ;
                             }
             results_container_html += '</div>' +
                         '</div>' +  
@@ -2235,7 +2235,7 @@
                                 results_container_html += '<span class="metadata-block text-right margin-left-20 is-clickable btn-save_program" data-code="QDG081"><i class="fa fa-save"></i>Save</span></span>' ;
                             }
                             if( !options["training_mode"] && options["secure_messaging"] && ( options["user_type"] == "physician" || options["user_type"] == "staff" ) ) {
-                              results_container_html += '<span class="metadata-block text-right margin-left-20 is-clickable btn-share_program" data-code="QDG081"><i class="fa fa-share-square"></i><span class="label">Send</span></span>' ;
+                              results_container_html += '<span class="metadata-block text-right margin-left-20 is-clickable btn-share_program" data-code="QDG081"><i class="fa fa-share-square-o"></i><span class="label">Send</span></span>' ;
                             }
     results_container_html += '</div>' +
                               '<div class="viewer--close_button">' +
