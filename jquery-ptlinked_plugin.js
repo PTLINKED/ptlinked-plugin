@@ -2883,7 +2883,7 @@
         api_root_url: '',                                           // The root URL to the PTLINKED api
         api_key: '',                                                // Customer (MDVIP) API Key
         app_root_url: 'https://mdvip-plugin.ptlinked.com/test',     // URL of where plugin is being used        
-        assets_cdn: 'https://0e7822f9ecb8551cd298-03053818a8848e389259d1c57ba1747f.ssl.cf2.rackcdn.com/',
+        assets_cdn: 'https://d2fwkse1ezzmt8.cloudfront.net/images/',
         video_bg: 'white',                                          // The BG color of the exercise video and images (white, grey, blue)        
         header_element_class: 'block-siteheader',                   // Plugin page header class
         viewer_header_element_class: 'viewer--header',              // Plugin exercise program viewer header class

@@ -1,7 +1,7 @@
 /**
 	PTLINKED Plugin Styles
 	Customer: MDVIP
-	Version: 1.0.9
+	Version: 1.0.10
 	Author: Mike Frank (PTLINKED LLC) - mfrank@ptlinked.com
 
 	Table of Contents
@@ -543,3 +543,4 @@ ul.workout-preview__thumbs li.selected span.item-number-indicator{ border-color:
 .ptlinked--filter_group ul.filter--item_list li.selected span{ background-color: #f7f7f7; border: 1px solid #d3cabd; border-radius: 1.5rem; margin-left: 1.5rem; padding: 0.3rem 1.5rem; }
 .ptlinked--filter_group ul.filter--item_list li.hidden{ display: none; }
 .clear-condition-filters{ position: absolute; width: 1.5rem; top: 42px; right: -30px; cursor: pointer; }
+#condition-filter{ display: none!important;}
